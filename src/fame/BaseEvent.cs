@@ -10,5 +10,11 @@ namespace fame
         public virtual BaseEventArgs Args { get; set; }
         public Guid SourceId { get; set; }
         public string SourceUserId { get; set; }
+
+        public BaseEvent()
+        {
+            RefId = Guid.NewGuid();
+            DateTimeUtc = DateTime.Now;
+        }
     }
 }

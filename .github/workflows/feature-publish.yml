@@ -1,0 +1,83 @@
+name: 'feature:push'
+
+on:
+  push:
+    branches:
+      - feature/*
+
+env:
+  ENV: Debug
+  PROJECT_ROOT: 'seaq'
+  PROJECT_NAME: 'seaq'
+  SEMVER: '0.1.0'
+  SUFFIX: 'alpha'
+  BRANCH: ''
+  FEATURE: ''
+  VERSION: ''
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: set runtime variables
+        run: |
+          # Set value locally to be be used in the following lines
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          SEARCH=feature/
+          FEATURE="${BRANCH/$SEARCH/}"
+          RUN_NUMBER=$(seq -f "%03g" $GITHUB_RUN_NUMBER $GITHUB_RUN_NUMBER)
+          echo "::set-env name=BRANCH::$BRANCH"
+          echo "::set-env name=FEATURE::$FEATURE"
+          echo "::set-env name=VERSION::$SEMVER-$SUFFIX-$RUN_NUMBER-$FEATURE"
+        shell: bash
+
+      - name: log runtime variables
+        run: |
+          echo BRANCH=$BRANCH
+          echo VERSION=$VERSION
+        shell: bash
+
+      - name: setup directories
+        run: |
+          mkdir --parents staging/bin
+          mkdir --parents staging/nupkg
+          mkdir --parents staging/artifact
+        shell: bash
+
+      - name: setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.201
+
+      - name: build
+        run: dotnet build src/$PROJECT_NAME.sln --configuration $ENV -p:Version=$VERSION
+        shell: bash
+
+      - name: publish
+        run: dotnet publish src/$PROJECT_NAME.sln --no-build --configuration $ENV --self-contained --framework net5.0 -p:Version=$VERSION --output staging/artifact
+        shell: bash
+
+      - name: pack
+        run: dotnet pack src/$PROJECT_NAME.sln --no-build --include-symbols --include-source --configuration $ENV /p:Version=$VERSION /p:SymbolPackageFormat=snupkg --output staging/nupkg
+        shell: bash
+
+      - name: show staging files
+        run: |
+          ls -la staging/bin
+          ls -la staging/nupkg
+          ls -la staging/artifact
+        shell: bash
+
+      - name: push
+        run: dotnet nuget push staging/nupkg/**/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate --source https://api.nuget.org/v3/index.json
+        shell: bash
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: ${{ env.PROJECT_NAME }}-${{ env.VERSION }}
+          path: staging/artifact

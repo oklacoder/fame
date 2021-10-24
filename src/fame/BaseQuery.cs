@@ -15,5 +15,11 @@ namespace fame
 
         public DateTime? FinishTime => (ErrorDateUtc ?? CompletedDateUtc);
         public long? DurationMs => FinishTime.HasValue ? (FinishTime - DateTimeUtc)?.Milliseconds : null;
+
+        public BaseQuery()
+        {
+            RefId = Guid.NewGuid();
+            DateTimeUtc = DateTime.Now;
+        }
     }
 }
