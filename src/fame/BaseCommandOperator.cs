@@ -12,7 +12,11 @@ namespace fame
         private readonly ILogger<BaseCommandOperator> _logger;
 
         public event EventHandler<IMessage> HandleStarted;
-        public event EventHandler<IMessage> HandleInvalid;
+        public event EventHandler<IMessage> HandleValidationStarted;
+        public event EventHandler<IMessage> HandleValidationSucceeded;
+        public event EventHandler<IMessage> HandleValidationFailed;
+        public event EventHandler<IMessage> HandleExecutionStarted;
+        public event EventHandler<IMessage> HandleExecutionSucceeded;
         public event EventHandler<IMessage> HandleSucceeded;
         public event EventHandler<IMessage> HandleFailed;
         public event EventHandler<IMessage> HandleFinished;
@@ -63,16 +67,20 @@ namespace fame
                 HandleStarted?.Invoke(this, cmd);
 
                 _logger?.LogDebug("{0} {1} validating...", cmd.GetType().FullName, cmd.RefId);
+                HandleValidationStarted?.Invoke(this, cmd);
                 if (!cmd.Validate(out var messages))
                 {
                     _logger?.LogDebug("{0} {1} failed validation", cmd.GetType().FullName, cmd.RefId);
                     messages?.ToList().ForEach(x => _logger?.LogDebug(x));
-                    HandleInvalid?.Invoke(this, cmd);                    
+                    HandleValidationFailed?.Invoke(this, cmd);                    
                     return new T().Invalid(messages, cmd);
                 }
+                HandleValidationSucceeded?.Invoke(this, cmd);
 
                 _logger?.LogDebug("{0} {1} validated.  Now executing...", cmd.GetType().FullName, cmd.RefId);
+                HandleExecutionStarted?.Invoke(this, cmd);
                 resp = await Handle<T>(cmd);
+                HandleExecutionSucceeded?.Invoke(this, cmd);
                 _logger?.LogDebug("{0} {1} execution complete.", cmd.GetType().FullName, cmd.RefId);
 
                 HandleSucceeded?.Invoke(this, cmd);

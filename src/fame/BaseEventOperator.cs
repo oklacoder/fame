@@ -11,7 +11,11 @@ namespace fame
         private readonly ILogger<BaseEventOperator> _logger;
 
         public event EventHandler<IMessage> HandleStarted;
-        public event EventHandler<IMessage> HandleInvalid;
+        public event EventHandler<IMessage> HandleValidationStarted;
+        public event EventHandler<IMessage> HandleValidationSucceeded;
+        public event EventHandler<IMessage> HandleValidationFailed;
+        public event EventHandler<IMessage> HandleExecutionStarted;
+        public event EventHandler<IMessage> HandleExecutionSucceeded;
         public event EventHandler<IMessage> HandleSucceeded;
         public event EventHandler<IMessage> HandleFailed;
         public event EventHandler<IMessage> HandleFinished;
@@ -61,7 +65,9 @@ namespace fame
                 HandleStarted?.Invoke(this, evt);
 
                 _logger?.LogDebug("{0} {1} validated.  Now executing...", evt.GetType().FullName, evt.RefId);
+                HandleExecutionStarted?.Invoke(this, evt);
                 resp = await Handle<T>(evt);
+                HandleExecutionSucceeded?.Invoke(this, evt);
                 _logger?.LogDebug("{0} {1} execution complete.", evt.GetType().FullName, evt.RefId);
 
                 HandleSucceeded?.Invoke(this, evt);

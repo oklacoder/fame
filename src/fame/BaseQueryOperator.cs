@@ -11,7 +11,11 @@ namespace fame
         private readonly ILogger<BaseQueryOperator> _logger;
 
         public event EventHandler<IMessage> HandleStarted;
-        public event EventHandler<IMessage> HandleInvalid;
+        public event EventHandler<IMessage> HandleValidationStarted;
+        public event EventHandler<IMessage> HandleValidationSucceeded;
+        public event EventHandler<IMessage> HandleValidationFailed;
+        public event EventHandler<IMessage> HandleExecutionStarted;
+        public event EventHandler<IMessage> HandleExecutionSucceeded;
         public event EventHandler<IMessage> HandleSucceeded;
         public event EventHandler<IMessage> HandleFailed;
         public event EventHandler<IMessage> HandleFinished;
@@ -61,7 +65,9 @@ namespace fame
                 HandleStarted?.Invoke(this, query);
 
                 _logger?.LogDebug("{0} {1} validated.  Now executing...", query.GetType().FullName, query.RefId);
+                HandleExecutionStarted?.Invoke(this, query);
                 resp = await Handle<T>(query);
+                HandleExecutionSucceeded?.Invoke(this, query);
                 _logger?.LogDebug("{0} {1} execution complete.", query.GetType().FullName, query.RefId);
 
                 HandleSucceeded?.Invoke(this, query);

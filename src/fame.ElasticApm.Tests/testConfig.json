@@ -1,0 +1,12 @@
+{
+  "ElasticApm": {
+    "ServerUrl": "http://localhost:8200",
+    "SecretToken": "lRiDTwv2dis5J53dke",
+    "TransactionSampleRate": 1.0,
+    "CaptureBody": true,
+    "UseElasticTraceparentHeader": true,
+    "Environment": "local",
+    "ServiceName": "fame_elasticapm_tests",
+    "FlushInterval": 0,
+  }
+}
