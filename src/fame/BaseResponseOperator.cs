@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace fame
@@ -21,10 +23,25 @@ namespace fame
         public event EventHandler<IMessage> HandleFinished;
 
         public BaseResponseOperator(
-            ILogger<BaseResponseOperator> logger = null)
+            IConfiguration config = null,
+            ILoggerFactory logger = null,
+            IEnumerable<IFamePlugin> plugins = null)
         {
-            this._logger = logger;
+            this._logger = logger.CreateLogger<BaseResponseOperator>();
+
+            List<string> _plugins = new List<string>();
+
+            if (plugins?.Any() is true)
+                foreach (var p in plugins)
+                {
+                    p.Configure(config, logger);
+                    p.Enroll(this);
+                    _plugins.Add(p.GetType().FullName);
+                }
+
+            Plugins = _plugins;
         }
+        public IEnumerable<string> Plugins { get; private set; }
 
         async Task<T> IOperator.Handle<T>(IMessage msg)
         {

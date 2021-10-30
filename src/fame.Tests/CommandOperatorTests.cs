@@ -1,9 +1,11 @@
-﻿using Xunit;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Xunit;
 
 namespace fame.Tests
 {
     public class CommandOperatorTests
     {
+        
         [Fact]
         public async void CommandOperator_HappyPath()
         {

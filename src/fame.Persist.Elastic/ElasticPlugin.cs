@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Nest;
 using System;
 using System.Collections.Generic;
@@ -16,16 +17,22 @@ namespace fame.Persist.Elastic
         public string IndexPrefix { get; set; }
     }
 
-    public static class ElasticPlugin
+    public class ElasticPlugin :
+        IFamePlugin
     {
-        private static ElasticPluginConfig _config = null;
-        private static ElasticClient _client = null;
-        public static bool IsConfigured => _config is not null;
-        public static bool? CanPing => _client?.Ping()?.IsValid;
+        private ElasticPluginConfig _config = null;
+        private ElasticClient _client = null;
+        public bool IsConfigured => _config is not null;
+        public bool? CanPing => _client?.Ping()?.IsValid;
 
-        public static void Configure(
-            IConfiguration config)
+        private ILogger<ElasticPlugin> _logger;
+
+        public void Configure(
+            IConfiguration config,
+            ILoggerFactory logger = null)
         {
+            _logger = logger?.CreateLogger<ElasticPlugin>();
+
             _config = new ElasticPluginConfig();
             config.GetSection(ElasticPluginConfig.ElasticPluginConfig_Key).Bind(_config);
 
@@ -34,71 +41,69 @@ namespace fame.Persist.Elastic
                 conn.BasicAuthentication(_config?.ElasticUser, _config?.ElasticPass);
             _client = new ElasticClient(conn);
         }
-        public static void Enroll(this IOperator target)
+        public void Enroll(IOperator target)
         {
             if (_client is null)
                 throw new InvalidOperationException($"Cannot enroll an operator in a plugin ({nameof(ElasticPlugin)}) that has not been configured.");
 
             target.HandleStarted += async (object target, IMessage msg) =>
             {
-                const int v = 1;
-                await IndexMessage(msg, v);
+                await IndexMessage(msg);
             };
             target.HandleValidationStarted += async (object target, IMessage msg) =>
             {
-                const int v = 2;
-                await IndexMessage(msg, v);
+                await IndexMessage(msg);
             };
             target.HandleValidationSucceeded += async (object target, IMessage msg) =>
             {
-                const int v = 3;
-                await IndexMessage(msg, v);
+                await IndexMessage(msg);
             };
             target.HandleValidationFailed += async (object target, IMessage msg) =>
             {
-                const int v = 4;
-                await IndexMessage(msg, v);
+                await IndexMessage(msg);
             };
             target.HandleExecutionStarted += async (object target, IMessage msg) =>
             {
-                const int v = 5;
-                await IndexMessage(msg, v);
+                await IndexMessage(msg);
             };
             target.HandleExecutionSucceeded += async (object target, IMessage msg) =>
             {
-                const int v = 6;
-                await IndexMessage(msg, v);
+                await IndexMessage(msg);
             };
             target.HandleSucceeded += async (object target, IMessage msg) =>
             {
-                const int v = 7;
-                await IndexMessage(msg, v);
+                await IndexMessage(msg);
             };
             target.HandleFailed += async (object target, IMessage msg) =>
             {
-                const int v = 8;
-                await IndexMessage(msg, v);
+                await IndexMessage(msg);
             };
             target.HandleFinished += async (object target, IMessage msg) =>
             {
-                const int v = 9;
-                await IndexMessage(msg, v);
+                await IndexMessage(msg);
             };
         }
 
-        private static Func<object, string> GetIndexNameFromObject = (object obj) =>
-            string.IsNullOrWhiteSpace(_config.IndexPrefix) ?
+        private string GetIndexNameFromObject(object obj)
+        {
+            return string.IsNullOrWhiteSpace(_config.IndexPrefix) ?
                 obj?.GetType()?.FullName.ToLowerInvariant() :
                 $"{_config.IndexPrefix}_{obj?.GetType()?.FullName.ToLowerInvariant()}";
-
-        private static async Task IndexMessage(IMessage msg, int version)
-        {
-            //TODO
-            ///explicit doc versioning.  real race condition worries wrt eventual consistency.
-            ///tests
+        }
             
+
+        private async Task IndexMessage(IMessage msg)
+        {
             if (msg is not null)
-                await _client.IndexAsync(msg, x => x.Index(GetIndexNameFromObject(msg)).Id(msg.RefId).Version(version).VersionType(Elasticsearch.Net.VersionType.ExternalGte));
+            {
+                var t = msg.GetType();
+
+                var resp = await _client?.IndexAsync(Convert.ChangeType(msg, t), x => x.Index(GetIndexNameFromObject(msg)).Id(msg.RefId));
+                if (!resp.IsValid)
+                {
+                    _logger.LogWarning("Couldn't persist message {0} using plugin {1} - {2}", msg.RefId, GetType().FullName, resp?.ServerError?.Error?.Reason);
+                }
+            }
         }
     }
 }

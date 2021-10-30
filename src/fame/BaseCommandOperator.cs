@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,9 +24,23 @@ namespace fame
 
         
         public BaseCommandOperator(
-            ILogger<BaseCommandOperator> logger = null)
+            IConfiguration config = null,
+            ILoggerFactory logger = null,
+            IEnumerable<IFamePlugin> plugins = null)
         {
-            this._logger = logger;
+            this._logger = logger?.CreateLogger<BaseCommandOperator>();
+
+            List<string> _plugins = new List<string>();
+
+            if (plugins?.Any() is true)
+            foreach (var p in plugins)
+            {
+                p.Configure(config, logger);
+                p.Enroll(this);
+                _plugins.Add(p.GetType().FullName);
+            }
+
+            Plugins = _plugins;
         }
 
         async Task<T> IOperator.Handle<T>(IMessage msg)
@@ -53,6 +68,7 @@ namespace fame
             return await SafeHandle<T>(cmd);
         }
 
+        public IEnumerable<string> Plugins { get; private set; }
 
         public abstract Task<T> Handle<T>(BaseCommand cmd)
             where T : BaseResponse;

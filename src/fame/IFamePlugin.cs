@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,11 @@ namespace fame
 {
     public interface IFamePlugin
     {
-        public static void Configure(IConfiguration config) 
+        public void Configure(IConfiguration config, ILoggerFactory logger) 
         {
             throw new NotImplementedException("Interface method can't be called direclty - override in implementation.");
         }
-        public static void Enroll(IOperator @operator) 
+        public void Enroll(IOperator @operator) 
         {
             throw new NotImplementedException("Interface method can't be called direclty - override in implementation.");
         }

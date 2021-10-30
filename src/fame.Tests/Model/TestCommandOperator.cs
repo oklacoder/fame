@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace fame.Tests
@@ -6,6 +9,15 @@ namespace fame.Tests
     public class TestCommandOperator :
         BaseCommandOperator
     {
+        public TestCommandOperator(
+            IConfiguration config = null,
+            ILoggerFactory logger = null,
+            IEnumerable<IFamePlugin> plugins = null) :
+            base(config, logger, plugins)
+        {
+
+        }
+
         public async override Task<T> Handle<T>(BaseCommand cmd)
         {
             T resp;

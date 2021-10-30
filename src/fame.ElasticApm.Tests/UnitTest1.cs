@@ -1,5 +1,6 @@
 using fame.Tests;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Nest;
 using System;
 using System.Linq;
@@ -39,6 +40,20 @@ namespace fame.ElasticApm.Tests
     {
         const string tran_index = "apm-6.7.1-transaction*";
         const string span_index = "apm-6.7.1-span*";
+
+
+        private ServiceCollection GetServices()
+        {
+            var services = new ServiceCollection();
+
+            var config = new ConfigurationBuilder()
+               .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+               .AddJsonFile("testConfig.json").Build();
+            services.AddSingleton<IConfiguration>(config);
+
+            return services;
+        }
+
 
         [Fact]
         public async void CommandOperator_CanConfigureAndExecute_HappyPath()
