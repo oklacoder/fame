@@ -49,8 +49,8 @@ namespace fame.ElasticApm.Tests
                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                .AddJsonFile("testConfig.json").Build();
 
-            config.ConfigureApm();
-            opr.EnrollApm();
+            ElasticApmPlugin.Configure(config);
+            ElasticApmPlugin.Enroll(opr);
 
             var resp = await opr.SafeHandle<TestResponse>(msg);
 
@@ -84,8 +84,8 @@ namespace fame.ElasticApm.Tests
             Assert.NotEmpty(spans);
             Assert.Equal(2, spans.Count);
 
-            var hasValidationSpan = spans.Any(x => x?.span?.name.Equals(Extensions.validation_key) is true);
-            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(Extensions.execution_key) is true);
+            var hasValidationSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.validation_key) is true);
+            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.execution_key) is true);
 
             Assert.True(hasValidationSpan);
             Assert.True(hasExecutionSpan);
@@ -102,8 +102,8 @@ namespace fame.ElasticApm.Tests
                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                .AddJsonFile("testConfig.json").Build();
 
-            config.ConfigureApm();
-            opr.EnrollApm();
+            ElasticApmPlugin.Configure(config);
+            ElasticApmPlugin.Enroll(opr);
 
             var resp = await opr.SafeHandle<TestResponse>(msg);
 
@@ -137,8 +137,8 @@ namespace fame.ElasticApm.Tests
             Assert.NotEmpty(spans);
             Assert.Equal(1, spans.Count);
 
-            var hasValidationSpan = spans.Any(x => x?.span?.name.Equals(Extensions.validation_key) is true);
-            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(Extensions.execution_key) is true);
+            var hasValidationSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.validation_key) is true);
+            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.execution_key) is true);
 
             Assert.True(hasValidationSpan);
             //Assert.True(hasExecutionSpan);
@@ -154,8 +154,8 @@ namespace fame.ElasticApm.Tests
                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                .AddJsonFile("testConfig.json").Build();
 
-            config.ConfigureApm();
-            opr.EnrollApm();
+            ElasticApmPlugin.Configure(config);
+            ElasticApmPlugin.Enroll(opr);
 
             var resp = await opr.SafeHandle<TestResponse>(msg);
 
@@ -188,8 +188,8 @@ namespace fame.ElasticApm.Tests
             Assert.NotEmpty(spans);
             Assert.Equal(2, spans.Count);
 
-            var hasValidationSpan = spans.Any(x => x?.span?.name.Equals(Extensions.validation_key) is true);
-            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(Extensions.execution_key) is true);
+            var hasValidationSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.validation_key) is true);
+            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.execution_key) is true);
 
             Assert.True(hasValidationSpan);
             Assert.True(hasExecutionSpan);
@@ -210,8 +210,8 @@ namespace fame.ElasticApm.Tests
                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                .AddJsonFile("testConfig.json").Build();
 
-            config.ConfigureApm();
-            opr.EnrollApm();
+            ElasticApmPlugin.Configure(config);
+            ElasticApmPlugin.Enroll(opr);
 
             var resp = await opr.SafeHandle<TestResponse>(msg);
 
@@ -245,7 +245,7 @@ namespace fame.ElasticApm.Tests
             Assert.NotEmpty(spans);
             Assert.Equal(1, spans.Count);
 
-            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(Extensions.execution_key) is true);
+            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.execution_key) is true);
 
             Assert.True(hasExecutionSpan);
         }
@@ -260,8 +260,8 @@ namespace fame.ElasticApm.Tests
                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                .AddJsonFile("testConfig.json").Build();
 
-            config.ConfigureApm();
-            opr.EnrollApm();
+            ElasticApmPlugin.Configure(config);
+            ElasticApmPlugin.Enroll(opr);
 
             var resp = await opr.SafeHandle<TestResponse>(msg);
 
@@ -294,7 +294,7 @@ namespace fame.ElasticApm.Tests
             Assert.NotEmpty(spans);
             Assert.Equal(1, spans.Count);
 
-            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(Extensions.execution_key) is true);
+            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.execution_key) is true);
 
             Assert.True(hasExecutionSpan);
         }
@@ -314,8 +314,8 @@ namespace fame.ElasticApm.Tests
                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                .AddJsonFile("testConfig.json").Build();
 
-            config.ConfigureApm();
-            opr.EnrollApm();
+            ElasticApmPlugin.Configure(config);
+            ElasticApmPlugin.Enroll(opr);
 
             var resp = await opr.SafeHandle<TestResponse>(msg);
 
@@ -349,7 +349,7 @@ namespace fame.ElasticApm.Tests
             Assert.NotEmpty(spans);
             Assert.Equal(1, spans.Count);
 
-            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(Extensions.execution_key) is true);
+            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.execution_key) is true);
 
             Assert.True(hasExecutionSpan);
         }
@@ -365,8 +365,8 @@ namespace fame.ElasticApm.Tests
                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                .AddJsonFile("testConfig.json").Build();
 
-            config.ConfigureApm();
-            opr.EnrollApm();
+            ElasticApmPlugin.Configure(config);
+            ElasticApmPlugin.Enroll(opr);
 
             var resp = await opr.SafeHandle<TestResponse>(msg);
 
@@ -399,7 +399,7 @@ namespace fame.ElasticApm.Tests
             Assert.NotEmpty(spans);
             Assert.Equal(1, spans.Count);
 
-            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(Extensions.execution_key) is true);
+            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.execution_key) is true);
 
             Assert.True(hasExecutionSpan);
         }
@@ -419,8 +419,8 @@ namespace fame.ElasticApm.Tests
                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                .AddJsonFile("testConfig.json").Build();
 
-            config.ConfigureApm();
-            opr.EnrollApm();
+            ElasticApmPlugin.Configure(config);
+            ElasticApmPlugin.Enroll(opr);
 
             var resp = await opr.SafeHandle<TestResponse>(msg);
 
@@ -454,7 +454,7 @@ namespace fame.ElasticApm.Tests
             Assert.NotEmpty(spans);
             Assert.Equal(1, spans.Count);
 
-            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(Extensions.execution_key) is true);
+            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.execution_key) is true);
 
             Assert.True(hasExecutionSpan);
         }
@@ -469,8 +469,8 @@ namespace fame.ElasticApm.Tests
                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                .AddJsonFile("testConfig.json").Build();
 
-            config.ConfigureApm();
-            opr.EnrollApm();
+            ElasticApmPlugin.Configure(config);
+            ElasticApmPlugin.Enroll(opr);
 
             var resp = await opr.SafeHandle<TestResponse>(msg);
 
@@ -503,7 +503,7 @@ namespace fame.ElasticApm.Tests
             Assert.NotEmpty(spans);
             Assert.Equal(1, spans.Count);
 
-            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(Extensions.execution_key) is true);
+            var hasExecutionSpan = spans.Any(x => x?.span?.name.Equals(ElasticApmPlugin.execution_key) is true);
 
             Assert.True(hasExecutionSpan);
         }

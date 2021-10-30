@@ -3,13 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fame", "fame\fame.csproj", "{99D6759B-87EA-45ED-B44D-4DA6D7A77D60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fame", "fame\fame.csproj", "{99D6759B-87EA-45ED-B44D-4DA6D7A77D60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fame.Tests", "fame.Tests\fame.Tests.csproj", "{513C50B6-E565-46BB-9505-E7D93FDA79A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fame.Tests", "fame.Tests\fame.Tests.csproj", "{513C50B6-E565-46BB-9505-E7D93FDA79A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fame.ElasticApm", "fame.ElasticApm\fame.ElasticApm.csproj", "{619F64B2-AD45-4CCE-ACC7-3A6936732C42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fame.ElasticApm", "fame.ElasticApm\fame.ElasticApm.csproj", "{619F64B2-AD45-4CCE-ACC7-3A6936732C42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fame.ElasticApm.Tests", "fame.ElasticApm.Tests\fame.ElasticApm.Tests.csproj", "{3F92B419-42CF-4EB7-A73E-F77E181DCED9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fame.ElasticApm.Tests", "fame.ElasticApm.Tests\fame.ElasticApm.Tests.csproj", "{3F92B419-42CF-4EB7-A73E-F77E181DCED9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fame.Persist.Elastic", "fame.Persist.Elastic\fame.Persist.Elastic.csproj", "{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fame.Persist.Elastic.Tests", "fame.Persist.Elastic.Tests\fame.Persist.Elastic.Tests.csproj", "{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{8FE12E92-8FF6-4ACF-8BFB-9BB9EE1D132C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Persist", "Persist", "{2E31DD60-DE97-4D23-8321-2D39C85A3968}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Telemetry", "Telemetry", "{7BEF500B-D989-4566-8C0C-03B19F8868C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,9 +29,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{99D6759B-87EA-45ED-B44D-4DA6D7A77D60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -72,5 +79,43 @@ Global
 		{3F92B419-42CF-4EB7-A73E-F77E181DCED9}.Release|x64.Build.0 = Release|Any CPU
 		{3F92B419-42CF-4EB7-A73E-F77E181DCED9}.Release|x86.ActiveCfg = Release|Any CPU
 		{3F92B419-42CF-4EB7-A73E-F77E181DCED9}.Release|x86.Build.0 = Release|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Debug|x64.Build.0 = Debug|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Debug|x86.Build.0 = Debug|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Release|x64.ActiveCfg = Release|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Release|x64.Build.0 = Release|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Release|x86.ActiveCfg = Release|Any CPU
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8}.Release|x86.Build.0 = Release|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Debug|x64.Build.0 = Debug|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Debug|x86.Build.0 = Debug|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Release|x64.ActiveCfg = Release|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Release|x64.Build.0 = Release|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Release|x86.ActiveCfg = Release|Any CPU
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{619F64B2-AD45-4CCE-ACC7-3A6936732C42} = {7BEF500B-D989-4566-8C0C-03B19F8868C6}
+		{3F92B419-42CF-4EB7-A73E-F77E181DCED9} = {7BEF500B-D989-4566-8C0C-03B19F8868C6}
+		{6011B82C-A5E6-4849-BBD1-6A0699F74DC8} = {2E31DD60-DE97-4D23-8321-2D39C85A3968}
+		{F5D28D87-7B20-4A0B-9A24-4370AEAEB9D9} = {2E31DD60-DE97-4D23-8321-2D39C85A3968}
+		{2E31DD60-DE97-4D23-8321-2D39C85A3968} = {8FE12E92-8FF6-4ACF-8BFB-9BB9EE1D132C}
+		{7BEF500B-D989-4566-8C0C-03B19F8868C6} = {8FE12E92-8FF6-4ACF-8BFB-9BB9EE1D132C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {929E25F1-93BB-471F-9D10-8562B14489F8}
 	EndGlobalSection
 EndGlobal

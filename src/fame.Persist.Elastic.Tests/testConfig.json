@@ -1,0 +1,8 @@
+{
+  "ElasticServer": {
+    "ElasticUrl": "http://localhost:9200",
+    "ElasticUser": "elastic",
+    "ElasticPass": "elastic",
+    "IndexPrefix": "tests_"
+  }
+}

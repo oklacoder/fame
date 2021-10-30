@@ -80,6 +80,7 @@ namespace fame
                 _logger?.LogDebug("{0} {1} validated.  Now executing...", cmd.GetType().FullName, cmd.RefId);
                 HandleExecutionStarted?.Invoke(this, cmd);
                 resp = await Handle<T>(cmd);
+                cmd.CompletedDateUtc = DateTime.UtcNow;
                 HandleExecutionSucceeded?.Invoke(this, cmd);
                 _logger?.LogDebug("{0} {1} execution complete.", cmd.GetType().FullName, cmd.RefId);
 
@@ -88,6 +89,8 @@ namespace fame
             }
             catch (Exception ex)
             {
+                cmd.ErrorDateUtc = DateTime.UtcNow;
+                cmd.ErrorDetails = ex;
                 HandleFailed?.Invoke(this, cmd);
                 List<string> messages = new List<string>();
                 messages.Add($"Error processing {cmd.GetType().FullName} {cmd.RefId}");

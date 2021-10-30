@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace fame.ElasticApm
 {
-    public static class Extensions
+    public static class ElasticApmPlugin 
     {
         public const string validation_key = "validation";
         public const string execution_key = "execution";
@@ -18,7 +18,7 @@ namespace fame.ElasticApm
             return $"{id}|{execution_key}";
         };
 
-        public static void ConfigureApm(this IConfiguration config)
+        public static void Configure(this IConfiguration config)
         {
             var apmConfig = new ApmConfigReader();
             config.GetSection(ApmConfigReader.ApmConfigSection_Key).Bind(apmConfig);
@@ -30,7 +30,7 @@ namespace fame.ElasticApm
             TransactionCache.Configure();
         }
 
-        public static void EnrollApm(this IOperator target)
+        public static void Enroll(this IOperator target)
         {
 
 

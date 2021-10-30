@@ -10,6 +10,7 @@ namespace fame
         public DateTime DateTimeUtc { get; set; }
         public DateTime? CompletedDateUtc { get; set; }
         public DateTime? ErrorDateUtc { get; set; }
+        public Exception? ErrorDetails { get; set; }
         
         public string UserId { get; set; }
         
