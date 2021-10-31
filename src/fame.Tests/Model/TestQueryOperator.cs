@@ -1,11 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace fame.Tests
 {
     public class TestQueryOperator :
         BaseQueryOperator
     {
+
+        public TestQueryOperator(
+            IConfiguration config = null,
+            ILoggerFactory logger = null,
+            IEnumerable<IFamePlugin> plugins = null) :
+            base(config, logger, plugins)
+        {
+
+        }
         public async override Task<T> Handle<T>(BaseQuery query)
         {
             T resp;

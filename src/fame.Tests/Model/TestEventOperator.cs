@@ -1,11 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace fame.Tests
 {
     public class TestEventOperator :
         BaseEventOperator
     {
+        public TestEventOperator(
+            IConfiguration config = null,
+            ILoggerFactory logger = null,
+            IEnumerable<IFamePlugin> plugins = null) :
+            base(config, logger, plugins)
+        {
+
+        }
         public async override Task<T> Handle<T>(BaseEvent evt)
         {
             T resp;
