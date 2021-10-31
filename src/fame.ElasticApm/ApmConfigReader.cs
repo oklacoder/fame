@@ -41,7 +41,8 @@ namespace fame.ElasticApm
         public IEnumerable<string> CustomExcludeNamespaces { get; set; } = Elastic.Apm.Config.ConfigConsts.DefaultValues.DefaultExcludedNamespaces;
         public IReadOnlyCollection<string> ExcludedNamespaces => CustomExcludeNamespaces?.ToList().AsReadOnly();
 
-        public TimeSpan FlushInterval { get; set; } = TimeSpan.FromMilliseconds(Elastic.Apm.Config.ConfigConsts.DefaultValues.FlushIntervalInMilliseconds);
+        public long? CustomFlushInterval { get; set; }
+        public TimeSpan FlushInterval => TimeSpan.FromMilliseconds(CustomFlushInterval ?? Elastic.Apm.Config.ConfigConsts.DefaultValues.FlushIntervalInMilliseconds);
 
         public Dictionary<string, string> CustomGlobalLabels { get; set; } = new Dictionary<string, string>();
         public IReadOnlyDictionary<string, string> GlobalLabels => new ReadOnlyDictionary<string, string>(CustomGlobalLabels);

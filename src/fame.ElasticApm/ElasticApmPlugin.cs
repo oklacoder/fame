@@ -1,10 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 
 namespace fame.ElasticApm
 {
-    public static class ElasticApmPlugin 
+    public class ElasticApmPlugin :
+        IFamePlugin
     {
         public const string validation_key = "validation";
         public const string execution_key = "execution";
@@ -18,8 +20,15 @@ namespace fame.ElasticApm
             return $"{id}|{execution_key}";
         };
 
-        public static void Configure(this IConfiguration config)
+        public bool IsConfigured => Elastic.Apm.Agent.IsConfigured;
+        private ILogger<ElasticApmPlugin> _logger;
+
+        public void Configure(
+            IConfiguration config,
+            ILoggerFactory logger = null)
         {
+            _logger = logger?.CreateLogger<ElasticApmPlugin>();
+
             var apmConfig = new ApmConfigReader();
             config.GetSection(ApmConfigReader.ApmConfigSection_Key).Bind(apmConfig);
             Elastic.Apm.Agent.Setup(
@@ -30,7 +39,7 @@ namespace fame.ElasticApm
             TransactionCache.Configure();
         }
 
-        public static void Enroll(this IOperator target)
+        public void Enroll(IOperator target)
         {
 
 

@@ -7,6 +7,8 @@
     "UseElasticTraceparentHeader": true,
     "Environment": "local",
     "ServiceName": "fame_elasticapm_tests",
-    "FlushInterval": 0,
+    //"FlushInterval": "0.00:00:01",
+    "CustomFlushInterval": 1,
+    "MaxBatchEventCount":  1
   }
 }
