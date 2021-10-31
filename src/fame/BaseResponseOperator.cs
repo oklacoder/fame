@@ -27,7 +27,7 @@ namespace fame
             ILoggerFactory logger = null,
             IEnumerable<IFamePlugin> plugins = null)
         {
-            this._logger = logger.CreateLogger<BaseResponseOperator>();
+            this._logger = logger?.CreateLogger<BaseResponseOperator>();
 
             List<string> _plugins = new List<string>();
 

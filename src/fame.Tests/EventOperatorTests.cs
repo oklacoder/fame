@@ -4,6 +4,7 @@ namespace fame.Tests
 {
     public class EventOperatorTests
     {
+
         [Fact]
         public async void EventOperator_HappyPath()
         {
