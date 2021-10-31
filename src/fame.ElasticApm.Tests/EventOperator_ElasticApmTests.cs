@@ -17,15 +17,17 @@ namespace fame.ElasticApm.Tests
         {
             var services = GetServices();
             var opr = services.GetService<TestEventOperator>();
+            var client = services.GetService<Nest.ElasticClient>();
 
-            Assert.Equal(1, opr.Plugins.Count());
-            Assert.Equal(typeof(ElasticApmPlugin).FullName, opr.Plugins.FirstOrDefault());
+            Assert.NotNull(client);
+
+            Assert.Contains(
+                opr.Plugins,
+                x => x.Equals(
+                    typeof(ElasticApmPlugin).FullName,
+                    StringComparison.OrdinalIgnoreCase));
 
             var msg = new TestEvent();
-            var config = new ConfigurationBuilder()
-               .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-               .AddJsonFile("testConfig.json").Build();
-
             
             var resp = await opr.SafeHandle<TestResponse>(msg);
 
@@ -35,12 +37,6 @@ namespace fame.ElasticApm.Tests
             Assert.True(resp.Successful);
 
             await Task.Delay(5000);
-
-            //check for transaction by msg.refId => spans by transactionId
-
-            var conn = new ConnectionSettings(new Uri("http://localhost:9200"));
-            conn.BasicAuthentication("elastic", "elastic");
-            var client = new Nest.ElasticClient(conn);
 
             var qResp = await client.SearchAsync<TransactionResult>(x => x.Size(100).Index(tran_index).Query(q => q.Match(m => m.Field("transaction.name").Query(msg.RefId.ToString()))));
 
@@ -70,12 +66,18 @@ namespace fame.ElasticApm.Tests
         {
             var services = GetServices();
             var opr = services.GetService<TestEventOperator>();
+            var client = services.GetService<Nest.ElasticClient>();
+
+            Assert.NotNull(client);
+
+            Assert.Contains(
+                opr.Plugins,
+                x => x.Equals(
+                    typeof(ElasticApmPlugin).FullName,
+                    StringComparison.OrdinalIgnoreCase));
 
             var args = new TestEventArgs() { ShouldThrow = true };
             var msg = new TestEvent(args);
-            var config = new ConfigurationBuilder()
-               .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-               .AddJsonFile("testConfig.json").Build();
 
             var resp = await opr.SafeHandle<TestResponse>(msg);
 
@@ -84,12 +86,6 @@ namespace fame.ElasticApm.Tests
             Assert.False(resp.Successful);
 
             await Task.Delay(5000);
-
-            //check for transaction by msg.refId => spans by transactionId
-
-            var conn = new ConnectionSettings(new Uri("http://localhost:9200"));
-            conn.BasicAuthentication("elastic", "elastic");
-            var client = new Nest.ElasticClient(conn);
 
             var qResp = await client.SearchAsync<TransactionResult>(x => x.Size(100).Index(tran_index).Query(q => q.Match(m => m.Field("transaction.name").Query(msg.RefId.ToString()))));
 

@@ -3,6 +3,7 @@
     "ElasticUrl": "http://localhost:9200",
     "ElasticUser": "elastic",
     "ElasticPass": "elastic",
-    "IndexPrefix": "tests_"
+    "IndexPrefix": "tests_",
+    "WaitForRefresh":  true
   }
 }

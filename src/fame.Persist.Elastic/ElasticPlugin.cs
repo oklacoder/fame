@@ -11,10 +11,11 @@ namespace fame.Persist.Elastic
     {
         public const string ElasticPluginConfig_Key = "ElasticServer";
 
-        public string ElasticUrl { get; set; }
-        public string ElasticUser { get; set; }
-        public string ElasticPass { get; set; }
+        public string ElasticUrl { get; set; } = "http://localhost:9200";
+        public string ElasticUser { get; set; } = "elastic";
+        public string ElasticPass { get; set; } = "elastic";
         public string IndexPrefix { get; set; }
+        public bool WaitForRefresh { get; set; } = false;
     }
 
     public class ElasticPlugin :
@@ -84,11 +85,23 @@ namespace fame.Persist.Elastic
             };
         }
 
+        public static string GetIndexNameFromObject(
+            object obj, 
+            string indexPrefix = null)
+        {
+            return string.IsNullOrWhiteSpace(indexPrefix) ?
+                obj?.GetType()?.FullName.ToLowerInvariant() :
+                $"{indexPrefix}_{GetObjectTypeAsIndexName(obj)}";
+        }
+
         private string GetIndexNameFromObject(object obj)
         {
-            return string.IsNullOrWhiteSpace(_config.IndexPrefix) ?
-                obj?.GetType()?.FullName.ToLowerInvariant() :
-                $"{_config.IndexPrefix}_{obj?.GetType()?.FullName.ToLowerInvariant()}";
+            return GetIndexNameFromObject(obj, _config?.IndexPrefix);
+        }
+
+        private static string GetObjectTypeAsIndexName(object obj)
+        {
+            return obj?.GetType()?.FullName.ToLowerInvariant();
         }
             
 
@@ -98,7 +111,15 @@ namespace fame.Persist.Elastic
             {
                 var t = msg.GetType();
 
-                var resp = await _client?.IndexAsync(Convert.ChangeType(msg, t), x => x.Index(GetIndexNameFromObject(msg)).Id(msg.RefId));
+                var resp = await _client?.IndexAsync(
+                    Convert.ChangeType(msg, t), 
+                    x => x
+                        .Index(GetIndexNameFromObject(msg))
+                        .Id(msg.RefId)
+                        .Refresh(
+                            _config?.WaitForRefresh == true ? 
+                                Elasticsearch.Net.Refresh.True : 
+                                Elasticsearch.Net.Refresh.False));
                 if (!resp.IsValid)
                 {
                     _logger.LogWarning("Couldn't persist message {0} using plugin {1} - {2}", msg.RefId, GetType().FullName, resp?.ServerError?.Error?.Reason);

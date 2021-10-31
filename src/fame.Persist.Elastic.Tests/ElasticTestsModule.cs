@@ -4,18 +4,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Nest;
 using System;
 
-namespace fame.ElasticApm.Tests
+namespace fame.Persist.Elastic.Tests
 {
-    public class ElasticApmTestsModule
+    public class ElasticTestsModule
     {
-        protected const string tran_index = "apm-7.15.0-transaction*";
-        protected const string span_index = "apm-7.15.0-span*";
+        IConfiguration config;
+        protected const int ElasticConsistencyDelay = 200;
 
         protected ServiceProvider GetServices()
         {
             var services = new ServiceCollection();
 
-            var config = new ConfigurationBuilder()
+            config = new ConfigurationBuilder()
                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                .AddJsonFile("testConfig.json").Build();
             services.AddSingleton<IConfiguration>(config);
@@ -23,10 +23,9 @@ namespace fame.ElasticApm.Tests
             var conn = new ConnectionSettings(new Uri("http://localhost:9200"));
             conn.BasicAuthentication("elastic", "elastic");
             var client = new Nest.ElasticClient(conn);
-
             services.AddSingleton(client);
 
-            services.AddSingleton<IFamePlugin, ElasticApmPlugin>();
+            services.AddSingleton<IFamePlugin, ElasticPlugin>();
 
             services.AddSingleton<TestCommandOperator>();
             services.AddSingleton<TestQueryOperator>();
@@ -35,6 +34,10 @@ namespace fame.ElasticApm.Tests
 
             return services.BuildServiceProvider();
         }
-    }
 
+        protected string GetIndexForMessage(object obj)
+        {
+            return ElasticPlugin.GetIndexNameFromObject(obj, config.GetValue<string>("ElasticServer:IndexPrefix"));
+        }
+    }
 }

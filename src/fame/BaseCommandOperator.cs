@@ -86,9 +86,10 @@ namespace fame
                 HandleValidationStarted?.Invoke(this, cmd);
                 if (!cmd.Validate(out var messages))
                 {
+                    cmd.ValidationFailedDateUtc = DateTime.UtcNow;
+                    HandleValidationFailed?.Invoke(this, cmd);
                     _logger?.LogDebug("{0} {1} failed validation", cmd.GetType().FullName, cmd.RefId);
                     messages?.ToList().ForEach(x => _logger?.LogDebug(x));
-                    HandleValidationFailed?.Invoke(this, cmd);                    
                     return new T().Invalid(messages, cmd);
                 }
                 HandleValidationSucceeded?.Invoke(this, cmd);

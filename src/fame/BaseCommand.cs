@@ -8,6 +8,7 @@ namespace fame
     {
         public Guid RefId { get; set; }
         public DateTime DateTimeUtc { get; set; }
+        public DateTime? ValidationFailedDateUtc { get; set; }
         public DateTime? CompletedDateUtc { get; set; }
         public DateTime? ErrorDateUtc { get; set; }
         public Exception? ErrorDetails { get; set; }
@@ -18,8 +19,8 @@ namespace fame
         public virtual BaseResponse Response { get; set; }
 
 
-        public DateTime? FinishTime => (ErrorDateUtc ?? CompletedDateUtc);
-        public long? DurationMs => FinishTime.HasValue ? (FinishTime - DateTimeUtc)?.Milliseconds : null;
+        public DateTime? FinishedDateUtc => (ErrorDateUtc ?? ValidationFailedDateUtc ?? CompletedDateUtc);
+        public long? DurationMs => FinishedDateUtc.HasValue ? (FinishedDateUtc - DateTimeUtc)?.Milliseconds : null;
 
         public BaseCommand()
         {
