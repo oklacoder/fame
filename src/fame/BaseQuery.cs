@@ -19,7 +19,7 @@ namespace fame
         public BaseQuery()
         {
             RefId = Guid.NewGuid();
-            DateTimeUtc = DateTime.Now;
+            DateTimeUtc = DateTime.UtcNow;
         }
     }
 }
