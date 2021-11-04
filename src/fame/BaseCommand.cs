@@ -4,14 +4,15 @@ using System.Collections.Generic;
 namespace fame
 {
     public class BaseCommand :
-        IMessage
+        BaseMessage
     {
-        public Guid RefId { get; set; }
-        public DateTime DateTimeUtc { get; set; }
+        public override Guid RefId { get; set; }
+        public override DateTime DateTimeUtc { get; set; }
         public DateTime? ValidationFailedDateUtc { get; set; }
         public DateTime? CompletedDateUtc { get; set; }
         public DateTime? ErrorDateUtc { get; set; }
-        public Exception? ErrorDetails { get; set; }
+        public string ErrorMessage { get; set; }
+        public string ErrorStackTrace { get; set; }
         
         public string UserId { get; set; }
         

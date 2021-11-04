@@ -3,10 +3,10 @@
 namespace fame
 {
     public class BaseQuery :
-        IMessage
+        BaseMessage
     {
-        public Guid RefId { get; set; }
-        public DateTime DateTimeUtc { get; set; }
+        public override Guid RefId { get; set; }
+        public override DateTime DateTimeUtc { get; set; }
         public DateTime? CompletedDateUtc { get; set; }
         public DateTime? ErrorDateUtc { get; set; }
 

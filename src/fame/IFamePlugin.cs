@@ -10,13 +10,9 @@ namespace fame
 {
     public interface IFamePlugin
     {
-        public void Configure(IConfiguration config, ILoggerFactory logger) 
-        {
-            throw new NotImplementedException("Interface method can't be called direclty - override in implementation.");
-        }
-        public void Enroll(IOperator @operator) 
-        {
-            throw new NotImplementedException("Interface method can't be called direclty - override in implementation.");
-        }
+        public bool? IsConfigured { get; }
+
+        public void Configure(IConfiguration config, ILoggerFactory logger);
+        public void Enroll(IOperator @operator);
     }
 }

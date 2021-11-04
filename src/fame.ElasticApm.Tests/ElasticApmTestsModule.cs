@@ -11,6 +11,8 @@ namespace fame.ElasticApm.Tests
         protected const string tran_index = "apm-7.15.0-transaction*";
         protected const string span_index = "apm-7.15.0-span*";
 
+        protected const int WaitForElastic = 5000;
+
         protected ServiceProvider GetServices()
         {
             var services = new ServiceCollection();

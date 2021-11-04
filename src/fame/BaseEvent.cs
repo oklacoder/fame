@@ -3,10 +3,10 @@
 namespace fame
 {
     public class BaseEvent :
-        IMessage
+        BaseMessage
     {
-        public Guid RefId { get; set; }
-        public DateTime DateTimeUtc { get; set; }
+        public override Guid RefId { get; set; }
+        public override DateTime DateTimeUtc { get; set; }
         public virtual BaseEventArgs Args { get; set; }
         public Guid SourceId { get; set; }
         public string SourceUserId { get; set; }

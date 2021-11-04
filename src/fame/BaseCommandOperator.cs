@@ -107,7 +107,8 @@ namespace fame
             catch (Exception ex)
             {
                 cmd.ErrorDateUtc = DateTime.UtcNow;
-                cmd.ErrorDetails = ex;
+                cmd.ErrorMessage = ex.Message;
+                cmd.ErrorStackTrace = ex.StackTrace;
                 HandleFailed?.Invoke(this, cmd);
                 List<string> messages = new List<string>();
                 messages.Add($"Error processing {cmd.GetType().FullName} {cmd.RefId}");

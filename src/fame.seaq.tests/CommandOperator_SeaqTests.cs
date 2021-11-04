@@ -1,16 +1,26 @@
 using fame.Tests;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
+using static fame.seaq.SeaqPlugin;
 
-namespace fame.Persist.Elastic.Tests
+namespace fame.seaq.tests
 {
 
-    public class CommandOperator_ElasticTests :
-        ElasticTestsModule
-    {   
+    public class CommandOperator_SeaqTests :
+        SeaqTestsModule
+    {
+        public CommandOperator_SeaqTests(
+            ITestOutputHelper output) :
+            base(output)
+        {
+
+        }
+
         [Fact]
         public async void CommandOperator_CanConfigureAndExecute_HappyPath()
         {
@@ -23,7 +33,7 @@ namespace fame.Persist.Elastic.Tests
             Assert.Contains(
                 opr.Plugins,
                 x => x.Equals(
-                    typeof(ElasticPlugin).FullName,
+                    typeof(SeaqPlugin).FullName,
                     StringComparison.OrdinalIgnoreCase));
 
             var msg = new TestCommand();
@@ -41,17 +51,20 @@ namespace fame.Persist.Elastic.Tests
             //let elastic percolate...
             await Task.Delay(ElasticConsistencyDelay);
 
-            var qResp = client.Search<TestCommand>(s => s.Index(idx).Query(q => q.Match(m => m.Field("refId").Query(msg.RefId.ToString()))));
+            var qResp = client.Search<MessageWrapper>(s => s.Index(idx).Query(q => q.Match(m => m.Field("message.refId").Query(msg.RefId.ToString()))));
 
             Assert.True(qResp.IsValid);
             Assert.NotNull(qResp.Documents);
             Assert.NotEmpty(qResp.Documents);
 
-            var doc = qResp.Documents.FirstOrDefault();
+            var m = qResp.Documents.FirstOrDefault();
+            var doc = m.GetObjectAsMessage<TestCommand>();
+
             Assert.NotNull(doc);
             Assert.NotNull(doc.CompletedDateUtc);
             Assert.Null(doc.ErrorDateUtc);
-            Assert.Null(doc.ErrorDetails);
+            Assert.Null(doc.ErrorMessage);
+            Assert.Null(doc.ErrorStackTrace);
             Assert.NotNull(doc.FinishedDateUtc);
         }
 
@@ -67,7 +80,7 @@ namespace fame.Persist.Elastic.Tests
             Assert.Contains(
                 opr.Plugins,
                 x => x.Equals(
-                    typeof(ElasticPlugin).FullName,
+                    typeof(SeaqPlugin).FullName,
                     StringComparison.OrdinalIgnoreCase));
 
             var args = new TestCommandArgs { ShouldThrow = true };
@@ -85,17 +98,20 @@ namespace fame.Persist.Elastic.Tests
             //let elastic percolate...
             await Task.Delay(ElasticConsistencyDelay);
 
-            var qResp = client.Search<TestCommand>(s => s.Index(idx).Query(q => q.Match(m => m.Field("refId").Query(msg.RefId.ToString()))));
+            var qResp = client.Search<MessageWrapper>(s => s.Index(idx).Query(q => q.Match(m => m.Field("message.refId").Query(msg.RefId.ToString()))));
 
             Assert.True(qResp.IsValid);
             Assert.NotNull(qResp.Documents);
             Assert.NotEmpty(qResp.Documents);
 
-            var doc = qResp.Documents.FirstOrDefault();
+            var m = qResp.Documents.FirstOrDefault();
+            var doc = m.GetObjectAsMessage<TestCommand>();
+
             Assert.NotNull(doc);
             Assert.Null(doc.CompletedDateUtc);
             Assert.NotNull(doc.ErrorDateUtc);
-            Assert.NotNull(doc.ErrorDetails);
+            Assert.NotNull(doc.ErrorMessage);
+            Assert.NotNull(doc.ErrorStackTrace);
             Assert.NotNull(doc.FinishedDateUtc);
         }
 
@@ -111,7 +127,7 @@ namespace fame.Persist.Elastic.Tests
             Assert.Contains(
                 opr.Plugins,
                 x => x.Equals(
-                    typeof(ElasticPlugin).FullName,
+                    typeof(SeaqPlugin).FullName,
                     StringComparison.OrdinalIgnoreCase));
 
             var args = new TestCommandArgs { IsValid = false };
@@ -129,18 +145,21 @@ namespace fame.Persist.Elastic.Tests
             //let elastic percolate...
             await Task.Delay(ElasticConsistencyDelay);
 
-            var qResp = client.Search<TestCommand>(s => s.Index(idx).Query(q => q.Match(m => m.Field("refId").Query(msg.RefId.ToString()))));
+            var qResp = client.Search<MessageWrapper>(s => s.Index(idx).Query(q => q.Match(m => m.Field("message.refId").Query(msg.RefId.ToString()))));
 
             Assert.True(qResp.IsValid);
             Assert.NotNull(qResp.Documents);
             Assert.NotEmpty(qResp.Documents);
 
-            var doc = qResp.Documents.FirstOrDefault();
+            var m = qResp.Documents.FirstOrDefault();
+            var doc = m.GetObjectAsMessage<TestCommand>();
+
             Assert.NotNull(doc);
             Assert.NotNull(doc.ValidationFailedDateUtc);
             Assert.Null(doc.CompletedDateUtc);
             Assert.Null(doc.ErrorDateUtc);
-            Assert.Null(doc.ErrorDetails);
+            Assert.Null(doc.ErrorMessage);
+            Assert.Null(doc.ErrorStackTrace);
             Assert.NotNull(doc.FinishedDateUtc);
         }
     }

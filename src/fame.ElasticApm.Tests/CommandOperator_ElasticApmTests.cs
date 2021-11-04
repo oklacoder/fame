@@ -38,7 +38,7 @@ namespace fame.ElasticApm.Tests
             Assert.True(resp.IsValid);
             Assert.True(resp.Successful);
 
-            await Task.Delay(5000);
+            await Task.Delay(WaitForElastic);
 
             //check for transaction by msg.refId => spans by transactionId
 
@@ -92,7 +92,7 @@ namespace fame.ElasticApm.Tests
             Assert.False(resp.IsValid);
             Assert.False(resp.Successful);
 
-            await Task.Delay(5000);
+            await Task.Delay(WaitForElastic);
 
             var qResp = client.Search<TransactionResult>(x => x.Size(100).Index(tran_index).Query(q => q.Match(m => m.Field("transaction.name").Query(msg.RefId.ToString()))));
 
@@ -142,7 +142,7 @@ namespace fame.ElasticApm.Tests
             Assert.Equal(msg.RefId, resp.SourceId);
             Assert.False(resp.Successful);
 
-            await Task.Delay(5000);
+            await Task.Delay(WaitForElastic);
 
             var qResp = client.Search<TransactionResult>(x => x.Size(100).Index(tran_index).Query(q => q.Match(m => m.Field("transaction.name").Query(msg.RefId.ToString()))));
 

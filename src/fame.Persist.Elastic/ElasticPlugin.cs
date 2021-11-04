@@ -7,23 +7,13 @@ using System.Threading.Tasks;
 
 namespace fame.Persist.Elastic
 {
-    public class ElasticPluginConfig
-    {
-        public const string ElasticPluginConfig_Key = "ElasticServer";
-
-        public string ElasticUrl { get; set; } = "http://localhost:9200";
-        public string ElasticUser { get; set; } = "elastic";
-        public string ElasticPass { get; set; } = "elastic";
-        public string IndexPrefix { get; set; }
-        public bool WaitForRefresh { get; set; } = false;
-    }
 
     public class ElasticPlugin :
         IFamePlugin
     {
         private ElasticPluginConfig _config = null;
         private ElasticClient _client = null;
-        public bool IsConfigured => _config is not null;
+        public bool? IsConfigured => _config is not null;
         public bool? CanPing => _client?.Ping()?.IsValid;
 
         private ILogger<ElasticPlugin> _logger;
@@ -44,7 +34,7 @@ namespace fame.Persist.Elastic
         }
         public void Enroll(IOperator target)
         {
-            if (_client is null)
+            if (IsConfigured is not true)
                 throw new InvalidOperationException($"Cannot enroll an operator in a plugin ({nameof(ElasticPlugin)}) that has not been configured.");
 
             target.HandleStarted += async (object target, IMessage msg) =>

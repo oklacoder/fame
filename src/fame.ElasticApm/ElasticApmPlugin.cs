@@ -20,7 +20,7 @@ namespace fame.ElasticApm
             return $"{id}|{execution_key}";
         };
 
-        public bool IsConfigured => Elastic.Apm.Agent.IsConfigured;
+        public bool? IsConfigured => Elastic.Apm.Agent.IsConfigured;
         private ILogger<ElasticApmPlugin> _logger;
 
         public void Configure(
