@@ -124,15 +124,15 @@ namespace fame.Persist.Postgresql
         {
             using (var context = GetContext())
             {
-                var c = await context.Commands.FirstOrDefaultAsync(x => x.MessageId == cmd.RefId.ToString());
+                var c = await context.Commands.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
                 if (c is null)
                 {
-                    c = new MessageWrapper<BaseCommand>(cmd);
+                    c = cmd;
                     context.Commands.Add(c);
                 }
                 else
                 {
-                    c.SetMessage(cmd);
+                    c = cmd;
                 }
                 if (!token.IsCancellationRequested)
                 {
@@ -149,15 +149,15 @@ namespace fame.Persist.Postgresql
 
             using (var context = GetContext())
             {
-                var c = await context.Events.FirstOrDefaultAsync(x => x.MessageId == evt.RefId.ToString());
+                var c = await context.Events.FirstOrDefaultAsync(x => x.RefId == evt.RefId);
                 if (c is null)
                 {
-                    c = new MessageWrapper<BaseEvent>(evt);
+                    c = evt;
                     context.Events.Add(c);
                 }
                 else 
-                {                    
-                    c.SetMessage(evt);
+                {
+                    c = evt;
                 }
                 if (!token.IsCancellationRequested)
                 {
@@ -174,15 +174,15 @@ namespace fame.Persist.Postgresql
 
             using (var context = GetContext())
             {
-                var c = await context.Queries.FirstOrDefaultAsync(x => x.MessageId == query.RefId.ToString());
+                var c = await context.Queries.FirstOrDefaultAsync(x => x.RefId == query.RefId);
                 if (c is null)
                 {
-                    c = new MessageWrapper<BaseQuery>(query);
+                    c = query;
                     context.Queries.Add(c);
                 }
                 else
                 {
-                    c.SetMessage(query);
+                    c = query;
                 }
                 if (!token.IsCancellationRequested)
                 {
@@ -199,15 +199,15 @@ namespace fame.Persist.Postgresql
 
             using (var context = GetContext())
             {
-                var c = await context.Responses.FirstOrDefaultAsync(x => x.MessageId == resp.RefId.ToString());
+                var c = await context.Responses.FirstOrDefaultAsync(x => x.RefId == resp.RefId);
                 if (c is null)
                 {
-                    c = new MessageWrapper<BaseResponse>(resp);
+                    c = resp;
                     context.Responses.Add(c);
                 }
                 else
                 {
-                    c.SetMessage(resp);
+                    c = resp;
                 }
                 if (!token.IsCancellationRequested)
                 {
@@ -248,6 +248,87 @@ namespace fame.Persist.Postgresql
                     .Distinct()
                     .ToList();
         }
+        public static IEnumerable<Type> GetAllLoadedEventTypes()
+        {
+            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            var implements =
+                allAssemblies
+                    .SelectMany(p =>
+                    {
+                        try
+                        {
+                            return p.GetTypes();
+                        }
+                        catch (ReflectionTypeLoadException e)
+                        {
+                            return e.Types.Where(x => x != null);
+                        }
+                    })
+                    .Where(p => typeof(BaseEvent).IsAssignableFrom(p))
+                    .Select(p => p.Assembly);
+
+            return
+                implements
+                    .SelectMany(x => x.GetTypes())
+                    .Where(x => typeof(BaseEvent).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract)
+                    .Distinct()
+                    .ToList();
+        }
+        public static IEnumerable<Type> GetAllLoadedQueryTypes()
+        {
+            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            var implements =
+                allAssemblies
+                    .SelectMany(p =>
+                    {
+                        try
+                        {
+                            return p.GetTypes();
+                        }
+                        catch (ReflectionTypeLoadException e)
+                        {
+                            return e.Types.Where(x => x != null);
+                        }
+                    })
+                    .Where(p => typeof(BaseQuery).IsAssignableFrom(p))
+                    .Select(p => p.Assembly);
+
+            return
+                implements
+                    .SelectMany(x => x.GetTypes())
+                    .Where(x => typeof(BaseQuery).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract)
+                    .Distinct()
+                    .ToList();
+        }
+        public static IEnumerable<Type> GetAllLoadedResponseTypes()
+        {
+            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            var implements =
+                allAssemblies
+                    .SelectMany(p =>
+                    {
+                        try
+                        {
+                            return p.GetTypes();
+                        }
+                        catch (ReflectionTypeLoadException e)
+                        {
+                            return e.Types.Where(x => x != null);
+                        }
+                    })
+                    .Where(p => typeof(BaseResponse).IsAssignableFrom(p))
+                    .Select(p => p.Assembly);
+
+            return
+                implements
+                    .SelectMany(x => x.GetTypes())
+                    .Where(x => typeof(BaseResponse).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract)
+                    .Distinct()
+                    .ToList();
+        }
     }
 
     public class ContextBase :
@@ -255,10 +336,10 @@ namespace fame.Persist.Postgresql
     {
         private readonly string _connectionString;
 
-        public DbSet<MessageWrapper<BaseCommand>> Commands { get; set; }
-        public DbSet<MessageWrapper<BaseQuery>> Queries { get; set; }
-        public DbSet<MessageWrapper<BaseEvent>> Events { get; set; }
-        public DbSet<MessageWrapper<BaseResponse>> Responses { get; set; }
+        public DbSet<BaseCommand> Commands { get; set; }
+        public DbSet<BaseQuery> Queries { get; set; }
+        public DbSet<BaseEvent> Events { get; set; }
+        public DbSet<BaseResponse> Responses { get; set; }
 
         public ContextBase()
         {
@@ -273,34 +354,77 @@ namespace fame.Persist.Postgresql
         protected override void OnModelCreating(
             ModelBuilder builder)
         {
-            
-            builder.Entity<MessageWrapper<BaseCommand>>()
-                .HasKey(x => x.SequenceId);
-            builder.Entity<MessageWrapper<BaseCommand>>()
-                .HasIndex(x => x.MessageId);
-            builder.Entity<MessageWrapper<BaseCommand>>()
-                .HasIndex(x => x.MessageType);
 
-            builder.Entity<MessageWrapper<BaseQuery>>()
-                .HasKey(x => x.SequenceId);
-            builder.Entity<MessageWrapper<BaseQuery>>()
-                .HasIndex(x => x.MessageId);
-            builder.Entity<MessageWrapper<BaseQuery>>()
-                .HasIndex(x => x.MessageType);
+            builder.Entity<BaseCommand>()
+                .HasKey(x => x.RefId);
+            builder.Entity<BaseCommand>()
+                .HasIndex(x => x.UserId);
+            builder.Entity<BaseCommand>()
+                .HasIndex(x => x.DateTimeUtc);
+            builder.Entity<BaseCommand>()
+                .Property(x => x.Args)
+                .HasColumnType("jsonb");
 
-            builder.Entity<MessageWrapper<BaseEvent>>()
-                .HasKey(x => x.SequenceId);
-            builder.Entity<MessageWrapper<BaseEvent>>()
-                .HasIndex(x => x.MessageId);
-            builder.Entity<MessageWrapper<BaseEvent>>()
-                .HasIndex(x => x.MessageType);
+            Util.GetAllLoadedCommandTypes().ToList().ForEach(x =>
+            {
+                builder.Entity<BaseCommand>()
+                    .HasDiscriminator<string>("Type")
+                    .HasValue(x, x.FullName);
+            });
 
-            builder.Entity<MessageWrapper<BaseResponse>>()
-                .HasKey(x => x.SequenceId);
-            builder.Entity<MessageWrapper<BaseResponse>>()
-                .HasIndex(x => x.MessageId);
-            builder.Entity<MessageWrapper<BaseResponse>>()
-                .HasIndex(x => x.MessageType);
+            builder.Entity<BaseQuery>()
+                .HasKey(x => x.RefId);
+            builder.Entity<BaseQuery>()
+                .HasIndex(x => x.UserId);
+            builder.Entity<BaseQuery>()
+                .HasIndex(x => x.DateTimeUtc);
+            builder.Entity<BaseQuery>()
+                .Property(x => x.Args)
+                .HasColumnType("jsonb");
+
+            Util.GetAllLoadedQueryTypes().ToList().ForEach(x =>
+            {
+                builder.Entity<BaseQuery>()
+                    .HasDiscriminator<string>("Type")
+                    .HasValue(x, x.FullName);
+            });
+
+            builder.Entity<BaseEvent>()
+                .HasKey(x => x.RefId);
+            builder.Entity<BaseEvent>()
+                .HasIndex(x => x.SourceId);
+            builder.Entity<BaseEvent>()
+                .HasIndex(x => x.SourceUserId);
+            builder.Entity<BaseEvent>()
+                .HasIndex(x => x.DateTimeUtc);
+            builder.Entity<BaseEvent>()
+                .Property(x => x.Args)
+                .HasColumnType("jsonb");
+
+            Util.GetAllLoadedEventTypes().ToList().ForEach(x =>
+            {
+                builder.Entity<BaseEvent>()
+                    .HasDiscriminator<string>("Type")
+                    .HasValue(x, x.FullName);
+            });
+
+            builder.Entity<BaseResponse>()
+                .HasKey(x => x.RefId);
+            builder.Entity<BaseResponse>()
+                .HasIndex(x => x.DateTimeUtc);
+            builder.Entity<BaseResponse>()
+                .Property(x => x.Args)
+                .HasColumnType("jsonb");
+            builder.Entity<BaseResponse>()
+                .Property(x => x.Messages)
+                .HasColumnType("jsonb");
+
+            Util.GetAllLoadedResponseTypes().ToList().ForEach(x =>
+            {
+                builder.Entity<BaseResponse>()
+                    .HasDiscriminator<string>("Type")
+                    .HasValue(x, x.FullName);
+            });
         }
 
         protected override void OnConfiguring(
@@ -312,8 +436,10 @@ namespace fame.Persist.Postgresql
             }
         }
     }
-    //do we want to make 4 more of these, or do we want to store all items in the same table?
-    //leaning for more specific pocos, but need time to think through implications
+
+    //pull out the wrapper, save the messages directly, fluent add as needed, and add discriminator stuff
+    //https://docs.microsoft.com/en-us/ef/core/modeling/inheritance
+
     public class MessageWrapper<T>
         where T : BaseMessage
     {

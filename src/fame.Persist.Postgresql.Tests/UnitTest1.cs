@@ -15,7 +15,7 @@ namespace fame.Persist.Postgresql.Tests
     {
         IConfiguration config;
         PostgresPluginConfig _config;
-        protected const int ElasticConsistencyDelay = 200;
+        protected const int ConsistencyDelay = 500;
 
         public PostgresTestsModule(
             ITestOutputHelper output)
@@ -85,19 +85,24 @@ namespace fame.Persist.Postgresql.Tests
             var cmd = new TestCommand(args);
             await opr.SafeHandle<TestResponse>(cmd);
 
-            MessageWrapper<BaseCommand> msg;
+            BaseCommand msg;
 
-            //await Task.Delay(1000);
+            await Task.Delay(ConsistencyDelay);
 
-            //using (var context = GetContext())
-            //{
-            //    msg = await context.Commands.FirstOrDefaultAsync(x => x.MessageId == cmd.RefId.ToString());
-            //}
+            using (var context = GetContext())
+            {
+                msg = await context.Commands.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+            }
 
-            //var c = msg?.Message as TestCommand;
+            var type = msg.GetType().FullName;
 
-            //Assert.NotNull(c);
-
+            Assert.NotNull(msg);
+            Assert.Equal(type, typeof(TestCommand).FullName);
+            Assert.NotNull(msg.CompletedDateUtc);
+            Assert.Null(msg.ErrorDateUtc);
+            Assert.Null(msg.ErrorMessage);
+            Assert.Null(msg.ErrorStackTrace);
+            Assert.NotNull(msg.Args);
         }
     }
     public class EventOperator_PostgresTests :
@@ -120,7 +125,20 @@ namespace fame.Persist.Postgresql.Tests
             var cmd = new TestEvent(args);
             await opr.SafeHandle<TestResponse>(cmd);
 
-            
+            BaseEvent msg;
+
+            await Task.Delay(ConsistencyDelay);
+
+            using (var context = GetContext())
+            {
+                msg = await context.Events.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+            }
+
+            var type = msg.GetType().FullName;
+
+            Assert.NotNull(msg);
+            Assert.Equal(type, typeof(TestEvent).FullName);
+            Assert.NotNull(msg.Args);
         }
     }
     public class QueryOperator_PostgresTests :
@@ -142,6 +160,23 @@ namespace fame.Persist.Postgresql.Tests
             var args = new TestQueryArgs() { ShouldThrow = false };
             var cmd = new TestQuery(args);
             await opr.SafeHandle<TestResponse>(cmd);
+
+            BaseQuery msg;
+
+            await Task.Delay(ConsistencyDelay);
+
+            using (var context = GetContext())
+            {
+                msg = await context.Queries.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+            }
+
+            var type = msg.GetType().FullName;
+
+            Assert.NotNull(msg);
+            Assert.Equal(type, typeof(TestQuery).FullName);
+            Assert.NotNull(msg.CompletedDateUtc);
+            Assert.Null(msg.ErrorDateUtc);
+            Assert.NotNull(msg.Args);
         }
     }
     public class ResponseOperator_PostgresTests :
@@ -163,6 +198,21 @@ namespace fame.Persist.Postgresql.Tests
             var args = new TestResponseArgs() { ShouldThrow = false };
             var cmd = new TestResponse(args);
             await opr.SafeHandle<TestResponse>(cmd);
+
+            BaseResponse msg;
+
+            await Task.Delay(ConsistencyDelay);
+
+            using (var context = GetContext())
+            {
+                msg = await context.Responses.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+            }
+
+            var type = msg.GetType().FullName;
+
+            Assert.NotNull(msg);
+            Assert.Equal(type, typeof(TestResponse).FullName);
+            Assert.NotNull(msg.Args);
         }
     }
 }

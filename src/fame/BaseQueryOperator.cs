@@ -84,6 +84,7 @@ namespace fame
                 _logger?.LogDebug("{0} {1} validated.  Now executing...", query.GetType().FullName, query.RefId);
                 HandleExecutionStarted?.Invoke(this, query);
                 resp = await Handle<T>(query);
+                query.CompletedDateUtc = DateTime.UtcNow;
                 HandleExecutionSucceeded?.Invoke(this, query);
                 _logger?.LogDebug("{0} {1} execution complete.", query.GetType().FullName, query.RefId);
 
