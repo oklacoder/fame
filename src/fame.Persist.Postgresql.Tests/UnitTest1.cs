@@ -1,8 +1,11 @@
 using fame.Tests;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -11,6 +14,7 @@ namespace fame.Persist.Postgresql.Tests
     public class PostgresTestsModule
     {
         IConfiguration config;
+        PostgresPluginConfig _config;
         protected const int ElasticConsistencyDelay = 200;
 
         public PostgresTestsModule(
@@ -34,7 +38,7 @@ namespace fame.Persist.Postgresql.Tests
         protected ServiceProvider GetServices()
         {
             var services = new ServiceCollection();
-            var _config = new PostgresPluginConfig();
+            _config = new PostgresPluginConfig();
 
             config = new ConfigurationBuilder()
                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
@@ -54,11 +58,18 @@ namespace fame.Persist.Postgresql.Tests
             return services.BuildServiceProvider();
         }
 
+
+        protected ContextBase GetContext()
+        {
+            return new ContextBase(_config.PostgresqlConnection);
+        }
+
+
     }
-    public class UnitTest1 :
+    public class CommandOperator_PostgresTests :
         PostgresTestsModule
     {
-        public UnitTest1(
+        public CommandOperator_PostgresTests(
             ITestOutputHelper output) :
             base(output)
         {
@@ -73,6 +84,31 @@ namespace fame.Persist.Postgresql.Tests
             var args = new TestCommandArgs() { IsValid = true, ShouldThrow = false };
             var cmd = new TestCommand(args);
             await opr.SafeHandle<TestResponse>(cmd);
+
+            MessageWrapper<BaseCommand> msg;
+
+            //await Task.Delay(1000);
+
+            //using (var context = GetContext())
+            //{
+            //    msg = await context.Commands.FirstOrDefaultAsync(x => x.MessageId == cmd.RefId.ToString());
+            //}
+
+            //var c = msg?.Message as TestCommand;
+
+            //Assert.NotNull(c);
+
+        }
+    }
+    public class EventOperator_PostgresTests :
+        PostgresTestsModule
+    {
+
+        public EventOperator_PostgresTests(
+            ITestOutputHelper output) :
+            base(output)
+        {
+
         }
         [Fact]
         public async void EventOperator_CanConfigureAndExecute_HappyPath()
@@ -83,6 +119,19 @@ namespace fame.Persist.Postgresql.Tests
             var args = new TestEventArgs() { ShouldThrow = false };
             var cmd = new TestEvent(args);
             await opr.SafeHandle<TestResponse>(cmd);
+
+            
+        }
+    }
+    public class QueryOperator_PostgresTests :
+        PostgresTestsModule
+    {
+
+        public QueryOperator_PostgresTests(
+            ITestOutputHelper output) :
+            base(output)
+        {
+
         }
         [Fact]
         public async void QueryOperator_CanConfigureAndExecute_HappyPath()
@@ -93,6 +142,17 @@ namespace fame.Persist.Postgresql.Tests
             var args = new TestQueryArgs() { ShouldThrow = false };
             var cmd = new TestQuery(args);
             await opr.SafeHandle<TestResponse>(cmd);
+        }
+    }
+    public class ResponseOperator_PostgresTests :
+        PostgresTestsModule
+    {
+
+        public ResponseOperator_PostgresTests(
+            ITestOutputHelper output) :
+            base(output)
+        {
+
         }
         [Fact]
         public async void ResponseOperator_CanConfigureAndExecute_HappyPath()

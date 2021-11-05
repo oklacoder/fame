@@ -10,6 +10,7 @@ using System.Threading;
 using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace fame.Persist.Postgresql
 {
@@ -126,7 +127,7 @@ namespace fame.Persist.Postgresql
                 var c = await context.Commands.FirstOrDefaultAsync(x => x.MessageId == cmd.RefId.ToString());
                 if (c is null)
                 {
-                    c = new MessageWrapper(cmd);
+                    c = new MessageWrapper<BaseCommand>(cmd);
                     context.Commands.Add(c);
                 }
                 else
@@ -151,8 +152,8 @@ namespace fame.Persist.Postgresql
                 var c = await context.Events.FirstOrDefaultAsync(x => x.MessageId == evt.RefId.ToString());
                 if (c is null)
                 {
-                    c = new MessageWrapper(evt);
-                    context.Commands.Add(c);
+                    c = new MessageWrapper<BaseEvent>(evt);
+                    context.Events.Add(c);
                 }
                 else 
                 {                    
@@ -176,8 +177,8 @@ namespace fame.Persist.Postgresql
                 var c = await context.Queries.FirstOrDefaultAsync(x => x.MessageId == query.RefId.ToString());
                 if (c is null)
                 {
-                    c = new MessageWrapper(query);
-                    context.Commands.Add(c);
+                    c = new MessageWrapper<BaseQuery>(query);
+                    context.Queries.Add(c);
                 }
                 else
                 {
@@ -201,8 +202,8 @@ namespace fame.Persist.Postgresql
                 var c = await context.Responses.FirstOrDefaultAsync(x => x.MessageId == resp.RefId.ToString());
                 if (c is null)
                 {
-                    c = new MessageWrapper(resp);
-                    context.Commands.Add(c);
+                    c = new MessageWrapper<BaseResponse>(resp);
+                    context.Responses.Add(c);
                 }
                 else
                 {
@@ -218,15 +219,46 @@ namespace fame.Persist.Postgresql
         }
     }
 
+    public static class Util
+    {
+        public static IEnumerable<Type> GetAllLoadedCommandTypes()
+        {
+            var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            var implements =
+                allAssemblies
+                    .SelectMany(p =>
+                    {
+                        try
+                        {
+                            return p.GetTypes();
+                        }
+                        catch (ReflectionTypeLoadException e)
+                        {
+                            return e.Types.Where(x => x != null);
+                        }
+                    })
+                    .Where(p => typeof(BaseCommand).IsAssignableFrom(p))
+                    .Select(p => p.Assembly);
+
+            return
+                implements
+                    .SelectMany(x => x.GetTypes())
+                    .Where(x => typeof(BaseCommand).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract)
+                    .Distinct()
+                    .ToList();
+        }
+    }
+
     public class ContextBase :
         DbContext
     {
         private readonly string _connectionString;
 
-        public DbSet<MessageWrapper> Commands { get; set; }
-        public DbSet<MessageWrapper> Queries { get; set; }
-        public DbSet<MessageWrapper> Events { get; set; }
-        public DbSet<MessageWrapper> Responses { get; set; }
+        public DbSet<MessageWrapper<BaseCommand>> Commands { get; set; }
+        public DbSet<MessageWrapper<BaseQuery>> Queries { get; set; }
+        public DbSet<MessageWrapper<BaseEvent>> Events { get; set; }
+        public DbSet<MessageWrapper<BaseResponse>> Responses { get; set; }
 
         public ContextBase()
         {
@@ -241,23 +273,33 @@ namespace fame.Persist.Postgresql
         protected override void OnModelCreating(
             ModelBuilder builder)
         {
-
-            builder.Entity<MessageWrapper>()
+            
+            builder.Entity<MessageWrapper<BaseCommand>>()
                 .HasKey(x => x.SequenceId);
-
-            //builder.Entity<MessageWrapper>()
-            //    .Property(x => x.MessageId)
-            //    .HasComputedColumnSql();
-            //builder.Entity<MessageWrapper>()
-            //    .Property(x => x.MessageType)
-            //    .HasComputedColumnSql();
-            //builder.Entity<MessageWrapper>()
-            //    .Property(x => x.DateTimeUtc)
-            //    .HasComputedColumnSql();
-
-            builder.Entity<MessageWrapper>()
+            builder.Entity<MessageWrapper<BaseCommand>>()
                 .HasIndex(x => x.MessageId);
-            builder.Entity<MessageWrapper>()
+            builder.Entity<MessageWrapper<BaseCommand>>()
+                .HasIndex(x => x.MessageType);
+
+            builder.Entity<MessageWrapper<BaseQuery>>()
+                .HasKey(x => x.SequenceId);
+            builder.Entity<MessageWrapper<BaseQuery>>()
+                .HasIndex(x => x.MessageId);
+            builder.Entity<MessageWrapper<BaseQuery>>()
+                .HasIndex(x => x.MessageType);
+
+            builder.Entity<MessageWrapper<BaseEvent>>()
+                .HasKey(x => x.SequenceId);
+            builder.Entity<MessageWrapper<BaseEvent>>()
+                .HasIndex(x => x.MessageId);
+            builder.Entity<MessageWrapper<BaseEvent>>()
+                .HasIndex(x => x.MessageType);
+
+            builder.Entity<MessageWrapper<BaseResponse>>()
+                .HasKey(x => x.SequenceId);
+            builder.Entity<MessageWrapper<BaseResponse>>()
+                .HasIndex(x => x.MessageId);
+            builder.Entity<MessageWrapper<BaseResponse>>()
                 .HasIndex(x => x.MessageType);
         }
 
@@ -270,8 +312,10 @@ namespace fame.Persist.Postgresql
             }
         }
     }
-
-    public class MessageWrapper 
+    //do we want to make 4 more of these, or do we want to store all items in the same table?
+    //leaning for more specific pocos, but need time to think through implications
+    public class MessageWrapper<T>
+        where T : BaseMessage
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long SequenceId { get; set; }
@@ -288,7 +332,7 @@ namespace fame.Persist.Postgresql
         }
 
         [Column(TypeName = "jsonb")]
-        public BaseMessage Message { get; set; }
+        public T Message { get; set; }
 
         public DateTime? DateTimeUtc
         {
@@ -303,7 +347,7 @@ namespace fame.Persist.Postgresql
         }
 
         public void SetMessage(
-            BaseMessage msg)
+            T msg)
         {
             Message = msg;
         }
@@ -313,10 +357,9 @@ namespace fame.Persist.Postgresql
 
         }
 
-        public MessageWrapper(
-            BaseMessage msg)
+        public MessageWrapper(T message)
         {
-            SetMessage(msg);
+            SetMessage(message);
         }
     }
 }
