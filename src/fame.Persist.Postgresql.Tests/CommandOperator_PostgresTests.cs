@@ -99,9 +99,70 @@ namespace fame.Persist.Postgresql.Tests
             Assert.NotNull(msg);
             Assert.Equal(type, typeof(TestCommand).FullName);
             Assert.NotNull(msg.CompletedDateUtc);
+            Assert.Null(msg.ValidationFailedDateUtc);
             Assert.Null(msg.ErrorDateUtc);
             Assert.Null(msg.ErrorMessage);
             Assert.Null(msg.ErrorStackTrace);
+            Assert.NotNull(msg.Args);
+        }
+        [Fact]
+        public async void CommandOperator_CanConfigureAndExecute_Invalid()
+        {
+            var services = GetServices();
+            var opr = services.GetService<TestCommandOperator>();
+
+            var args = new TestCommandArgs() { IsValid = false, ShouldThrow = false };
+            var cmd = new TestCommand(args);
+            await opr.SafeHandle<TestResponse>(cmd);
+
+            BaseCommand msg;
+
+            await Task.Delay(ConsistencyDelay);
+
+            using (var context = GetContext())
+            {
+                msg = await context.Commands.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+            }
+
+            var type = msg.GetType().FullName;
+
+            Assert.NotNull(msg);
+            Assert.Equal(type, typeof(TestCommand).FullName);
+            Assert.Null(msg.CompletedDateUtc);
+            Assert.NotNull(msg.ValidationFailedDateUtc);
+            Assert.Null(msg.ErrorDateUtc);
+            Assert.Null(msg.ErrorMessage);
+            Assert.Null(msg.ErrorStackTrace);
+            Assert.NotNull(msg.Args);
+        }
+        [Fact]
+        public async void CommandOperator_CanConfigureAndExecute_Error()
+        {
+            var services = GetServices();
+            var opr = services.GetService<TestCommandOperator>();
+
+            var args = new TestCommandArgs() { IsValid = true, ShouldThrow = true };
+            var cmd = new TestCommand(args);
+            await opr.SafeHandle<TestResponse>(cmd);
+
+            BaseCommand msg;
+
+            await Task.Delay(ConsistencyDelay);
+
+            using (var context = GetContext())
+            {
+                msg = await context.Commands.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+            }
+
+            var type = msg.GetType().FullName;
+
+            Assert.NotNull(msg);
+            Assert.Equal(type, typeof(TestCommand).FullName);
+            Assert.Null(msg.CompletedDateUtc);
+            Assert.Null(msg.ValidationFailedDateUtc);
+            Assert.NotNull(msg.ErrorDateUtc);
+            Assert.NotNull(msg.ErrorMessage);
+            Assert.NotNull(msg.ErrorStackTrace);
             Assert.NotNull(msg.Args);
         }
     }
@@ -122,6 +183,31 @@ namespace fame.Persist.Postgresql.Tests
             var opr = services.GetService<TestEventOperator>();
 
             var args = new TestEventArgs() { ShouldThrow = false };
+            var cmd = new TestEvent(args);
+            await opr.SafeHandle<TestResponse>(cmd);
+
+            BaseEvent msg;
+
+            await Task.Delay(ConsistencyDelay);
+
+            using (var context = GetContext())
+            {
+                msg = await context.Events.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+            }
+
+            var type = msg.GetType().FullName;
+
+            Assert.NotNull(msg);
+            Assert.Equal(type, typeof(TestEvent).FullName);
+            Assert.NotNull(msg.Args);
+        }
+        [Fact]
+        public async void EventOperator_CanConfigureAndExecute_Error()
+        {
+            var services = GetServices();
+            var opr = services.GetService<TestEventOperator>();
+
+            var args = new TestEventArgs() { ShouldThrow = true };
             var cmd = new TestEvent(args);
             await opr.SafeHandle<TestResponse>(cmd);
 
@@ -178,6 +264,35 @@ namespace fame.Persist.Postgresql.Tests
             Assert.Null(msg.ErrorDateUtc);
             Assert.NotNull(msg.Args);
         }
+        [Fact]
+        public async void QueryOperator_CanConfigureAndExecute_Error()
+        {
+            var services = GetServices();
+            var opr = services.GetService<TestQueryOperator>();
+
+            var args = new TestQueryArgs() { ShouldThrow = true };
+            var cmd = new TestQuery(args);
+            await opr.SafeHandle<TestResponse>(cmd);
+
+            BaseQuery msg;
+
+            await Task.Delay(ConsistencyDelay);
+
+            using (var context = GetContext())
+            {
+                msg = await context.Queries.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+            }
+
+            var type = msg.GetType().FullName;
+
+            Assert.NotNull(msg);
+            Assert.Equal(type, typeof(TestQuery).FullName);
+            Assert.Null(msg.CompletedDateUtc);
+            Assert.NotNull(msg.Args);
+            Assert.NotNull(msg.ErrorDateUtc);
+            Assert.NotNull(msg.ErrorMessage);
+            Assert.NotNull(msg.ErrorStackTrace);
+        }
     }
     public class ResponseOperator_PostgresTests :
         PostgresTestsModule
@@ -196,6 +311,31 @@ namespace fame.Persist.Postgresql.Tests
             var opr = services.GetService<TestResponseOperator>();
 
             var args = new TestResponseArgs() { ShouldThrow = false };
+            var cmd = new TestResponse(args);
+            await opr.SafeHandle<TestResponse>(cmd);
+
+            BaseResponse msg;
+
+            await Task.Delay(ConsistencyDelay);
+
+            using (var context = GetContext())
+            {
+                msg = await context.Responses.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+            }
+
+            var type = msg.GetType().FullName;
+
+            Assert.NotNull(msg);
+            Assert.Equal(type, typeof(TestResponse).FullName);
+            Assert.NotNull(msg.Args);
+        }
+        [Fact]
+        public async void ResponseOperator_CanConfigureAndExecute_Error()
+        {
+            var services = GetServices();
+            var opr = services.GetService<TestResponseOperator>();
+
+            var args = new TestResponseArgs() { ShouldThrow = true };
             var cmd = new TestResponse(args);
             await opr.SafeHandle<TestResponse>(cmd);
 

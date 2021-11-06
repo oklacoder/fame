@@ -93,6 +93,9 @@ namespace fame
             }
             catch (Exception ex)
             {
+                query.ErrorDateUtc = DateTime.UtcNow;
+                query.ErrorMessage = ex.Message;
+                query.ErrorStackTrace = ex.StackTrace;
                 HandleFailed?.Invoke(this, query);
                 List<string> messages = new List<string>();
                 messages.Add($"Error processing {query.GetType().FullName} {query.RefId}");
