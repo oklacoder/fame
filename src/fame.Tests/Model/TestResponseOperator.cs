@@ -25,7 +25,7 @@ namespace fame.Tests
 
             var args = res.Args as TestResponseArgs;
             if (args?.ShouldThrow is true)
-                throw new Exception("Manually thrown for testing purposes.");
+                throw new InvalidOperationException("Manually thrown for testing purposes.");
 
             resp = new TestResponse() as T;
             if (resp is null) throw new InvalidCastException(

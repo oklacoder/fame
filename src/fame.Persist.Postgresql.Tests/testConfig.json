@@ -1,0 +1,5 @@
+{
+  "PostgresServer": {
+    "PostgresqlConnection": "Host=localhost;Database=fame;Username=postgres;Password=admin"
+  }
+}

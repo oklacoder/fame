@@ -14,7 +14,7 @@ namespace fame
         public BaseEvent()
         {
             RefId = Guid.NewGuid();
-            DateTimeUtc = DateTime.Now;
+            DateTimeUtc = DateTime.UtcNow;
         }
     }
 }

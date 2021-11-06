@@ -9,6 +9,8 @@ namespace fame
         public override DateTime DateTimeUtc { get; set; }
         public DateTime? CompletedDateUtc { get; set; }
         public DateTime? ErrorDateUtc { get; set; }
+        public string ErrorMessage { get; set; }
+        public string ErrorStackTrace { get; set; }
 
         public virtual BaseQueryArgs Args { get; set; }
         public string UserId { get; set; }
@@ -19,7 +21,7 @@ namespace fame
         public BaseQuery()
         {
             RefId = Guid.NewGuid();
-            DateTimeUtc = DateTime.Now;
+            DateTimeUtc = DateTime.UtcNow;
         }
     }
 }
