@@ -11,6 +11,8 @@ namespace fame
         public Guid SourceId { get; set; }
         public string SourceUserId { get; set; }
 
+        public string AggregateId => Args?.AggregateId;
+
         public BaseEvent()
         {
             RefId = Guid.NewGuid();
