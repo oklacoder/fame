@@ -20,5 +20,15 @@ namespace fame
             RefId = Guid.NewGuid();
             DateTimeUtc = DateTime.UtcNow;
         }
+
+        public BaseResponse(
+            Guid sourceId,
+            BaseResponseArgs args)
+        {
+            RefId = Guid.NewGuid();
+            DateTimeUtc = DateTime.UtcNow;
+            SourceId = sourceId;
+            Args = args;
+        }
     }
 }

@@ -23,5 +23,15 @@ namespace fame
             RefId = Guid.NewGuid();
             DateTimeUtc = DateTime.UtcNow;
         }
+
+        public BaseQuery(
+            string userId,
+            BaseQueryArgs args)
+        {
+            RefId = Guid.NewGuid();
+            DateTimeUtc = DateTime.UtcNow;
+            UserId = userId;
+            Args = args;
+        }
     }
 }

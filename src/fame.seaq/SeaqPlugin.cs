@@ -102,7 +102,7 @@ namespace fame.seaq
                 idx = _cluster.Indices.FirstOrDefault(x => x.Name.EndsWith(w.MessageType, StringComparison.OrdinalIgnoreCase));
             }
 
-            _cluster.Commit(w);
+            await _cluster.CommitAsync(w);
         }
     }
 
