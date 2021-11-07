@@ -15,7 +15,7 @@ namespace fame.Persist.Postgresql.Tests
     {
         IConfiguration config;
         PostgresPluginConfig _config;
-        protected const int ConsistencyDelay = 500;
+        protected const int ConsistencyDelay = 1000;
 
         public PostgresTestsModule(
             ITestOutputHelper output)

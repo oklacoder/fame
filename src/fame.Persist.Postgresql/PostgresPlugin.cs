@@ -116,21 +116,21 @@ namespace fame.Persist.Postgresql
         {
             using (var context = GetContext())
             {
+                if (token.IsCancellationRequested) return -1;
                 var c = await context.Commands.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
                 if (c is null)
                 {
                     c = cmd;
-                    context.Commands.Add(c);
+                    await context.Commands.AddAsync(c);
                 }
                 else
                 {
+                    c.SequenceId = cmd.SequenceId;
                     c = cmd;
                 }
-                if (!token.IsCancellationRequested)
-                {
-                    _tokenCache.TryRemove(cmd.RefId, out _);
-                    await context.SaveChangesAsync();
-                }
+                if (token.IsCancellationRequested) return -1;
+                await context.SaveChangesAsync();
+                _tokenCache.TryRemove(cmd.RefId, out _);
             }
             return 1;
         }
@@ -141,21 +141,22 @@ namespace fame.Persist.Postgresql
 
             using (var context = GetContext())
             {
+                if (token.IsCancellationRequested) return -1;
                 var c = await context.Events.FirstOrDefaultAsync(x => x.RefId == evt.RefId);
                 if (c is null)
                 {
                     c = evt;
-                    context.Events.Add(c);
+                    await context.Events.AddAsync(c);
                 }
-                else 
+                else
                 {
+                    c.SequenceId = evt.SequenceId;
                     c = evt;
                 }
-                if (!token.IsCancellationRequested)
-                {
-                    _tokenCache.TryRemove(evt.RefId, out _);
-                    await context.SaveChangesAsync();
-                }
+
+                if (token.IsCancellationRequested) return -1;
+                await context.SaveChangesAsync();
+                _tokenCache.TryRemove(evt.RefId, out _);
             }
             return 2;
         }
@@ -166,21 +167,22 @@ namespace fame.Persist.Postgresql
 
             using (var context = GetContext())
             {
+                if (token.IsCancellationRequested) return -1;
                 var c = await context.Queries.FirstOrDefaultAsync(x => x.RefId == query.RefId);
                 if (c is null)
                 {
                     c = query;
-                    context.Queries.Add(c);
+                    await context.Queries.AddAsync(c);
                 }
                 else
                 {
+                    c.SequenceId = query.SequenceId;
                     c = query;
                 }
-                if (!token.IsCancellationRequested)
-                {
-                    _tokenCache.TryRemove(query.RefId, out _);
-                    await context.SaveChangesAsync();
-                }
+
+                if (token.IsCancellationRequested) return -1;
+                _tokenCache.TryRemove(query.RefId, out _);
+                await context.SaveChangesAsync();
             }
             return 3;
         }
@@ -191,21 +193,22 @@ namespace fame.Persist.Postgresql
 
             using (var context = GetContext())
             {
+                if (token.IsCancellationRequested) return -1;
                 var c = await context.Responses.FirstOrDefaultAsync(x => x.RefId == resp.RefId);
                 if (c is null)
                 {
                     c = resp;
-                    context.Responses.Add(c);
+                    await context.Responses.AddAsync(c);
                 }
                 else
                 {
+                    c.SequenceId = resp.SequenceId;
                     c = resp;
                 }
-                if (!token.IsCancellationRequested)
-                {
-                    _tokenCache.TryRemove(resp.RefId, out _);
-                    await context.SaveChangesAsync();
-                }
+
+                if (token.IsCancellationRequested) return -1;
+                _tokenCache.TryRemove(resp.RefId, out _);
+                await context.SaveChangesAsync();
             }
             return 4;
         }

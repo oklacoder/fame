@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace fame.Persist.Postgresql
 {
+
     public class ContextBase :
         DbContext
     {
@@ -28,7 +29,9 @@ namespace fame.Persist.Postgresql
         {
 
             builder.Entity<BaseCommand>()
-                .HasKey(x => x.RefId);
+                .HasKey(x => x.SequenceId);
+            builder.Entity<BaseCommand>()
+                .HasIndex(x => x.RefId);
             builder.Entity<BaseCommand>()
                 .HasIndex(x => x.UserId);
             builder.Entity<BaseCommand>()
@@ -45,7 +48,9 @@ namespace fame.Persist.Postgresql
             });
 
             builder.Entity<BaseQuery>()
-                .HasKey(x => x.RefId);
+                .HasKey(x => x.SequenceId);
+            builder.Entity<BaseQuery>()
+                .HasIndex(x => x.RefId);
             builder.Entity<BaseQuery>()
                 .HasIndex(x => x.UserId);
             builder.Entity<BaseQuery>()
@@ -62,7 +67,9 @@ namespace fame.Persist.Postgresql
             });
 
             builder.Entity<BaseEvent>()
-                .HasKey(x => x.RefId);
+                .HasKey(x => x.SequenceId);
+            builder.Entity<BaseEvent>()
+                .HasIndex(x => x.RefId);
             builder.Entity<BaseEvent>()
                 .HasIndex(x => x.SourceId);
             builder.Entity<BaseEvent>()
@@ -81,7 +88,9 @@ namespace fame.Persist.Postgresql
             });
 
             builder.Entity<BaseResponse>()
-                .HasKey(x => x.RefId);
+                .HasKey(x => x.SequenceId);
+            builder.Entity<BaseResponse>()
+                .HasIndex(x => x.RefId);
             builder.Entity<BaseResponse>()
                 .HasIndex(x => x.DateTimeUtc);
             builder.Entity<BaseResponse>()

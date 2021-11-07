@@ -6,6 +6,7 @@ namespace fame
 {
     public interface IMessage
     {
+        public long SequenceId { get; set; }
         public Guid RefId { get; set; }
         public DateTime DateTimeUtc { get; set; }
     }
@@ -13,6 +14,7 @@ namespace fame
     public class BaseMessage :
         IMessage
     {
+        public virtual long SequenceId { get; set; }
         public virtual Guid RefId { get; set; }
         public virtual DateTime DateTimeUtc { get; set; }
     }
