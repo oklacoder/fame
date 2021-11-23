@@ -54,7 +54,7 @@ jobs:
         shell: bash
 
       - name: publish
-        run: dotnet publish src/$PROJECT_NAME.sln --no-build --configuration $ENV --self-contained --framework net5.0 -p:Version=$VERSION --output staging/artifact
+        run: dotnet publish src/$PROJECT_NAME.sln --no-build --configuration $ENV --self-contained --framework net6.0 -p:Version=$VERSION --output staging/artifact
         shell: bash
 
       - name: pack
