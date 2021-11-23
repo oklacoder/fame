@@ -32,12 +32,16 @@ namespace fame
             List<string> _plugins = new List<string>();
 
             if (plugins?.Any() is true)
+            {
+                _logger.LogDebug("Configuring plugins for {0}", GetType().FullName);
                 foreach (var p in plugins)
                 {
+                    _logger?.LogDebug("Configuring plugin: {0}", p.GetType().FullName);
                     p.Configure(config, logger);
                     p.Enroll(this);
                     _plugins.Add(p.GetType().FullName);
                 }
+            }
 
             Plugins = _plugins;
         }
