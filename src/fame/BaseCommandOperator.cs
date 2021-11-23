@@ -34,7 +34,7 @@ namespace fame
 
             if (plugins?.Any() is true)
             {
-                _logger.LogDebug("Configuring plugins for {0}", GetType().FullName);
+                _logger?.LogDebug("Configuring plugins for {0}", GetType().FullName);
                 foreach (var p in plugins)
                 {
                     _logger?.LogDebug("Configuring plugin: {0}", p.GetType().FullName);
