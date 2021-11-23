@@ -114,103 +114,166 @@ namespace fame.Persist.Postgresql
             BaseCommand cmd,
             CancellationToken token)
         {
-            using (var context = GetContext())
+            try
             {
-                if (token.IsCancellationRequested) return -1;
-                var c = await context.Commands.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
-                if (c is null)
+                using (var context = GetContext())
                 {
-                    c = cmd;
-                    await context.Commands.AddAsync(c);
+                    if (token.IsCancellationRequested) return -1;
+                    var c = await context.Commands.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+                    if (c is null)
+                    {
+                        c = cmd;
+                        await context.Commands.AddAsync(c);
+                    }
+                    else
+                    {
+                        c.SequenceId = cmd.SequenceId;
+                        c = cmd;
+                    }
+                    if (token.IsCancellationRequested) return -1;
+                    await context.SaveChangesAsync();
+                    _tokenCache.TryRemove(cmd.RefId, out _);
                 }
-                else
-                {
-                    c.SequenceId = cmd.SequenceId;
-                    c = cmd;
-                }
-                if (token.IsCancellationRequested) return -1;
-                await context.SaveChangesAsync();
-                _tokenCache.TryRemove(cmd.RefId, out _);
+                return 1;
+
             }
-            return 1;
+            catch (Exception ex)
+            {
+                _logger?.LogError("Could not save {0} {1}", cmd.GetType().FullName, cmd.RefId);
+                _logger?.LogError(ex.Message);
+                _logger?.LogError(ex.StackTrace);
+                if (ex.InnerException != null)
+                {
+                    _logger?.LogError(ex.InnerException.Message);
+                    _logger?.LogError(ex.InnerException.StackTrace);
+                }
+                throw;
+            }
         }
         private async Task<int> SaveEvent(
             BaseEvent evt,
             CancellationToken token)
         {
 
-            using (var context = GetContext())
+            try
             {
-                if (token.IsCancellationRequested) return -1;
-                var c = await context.Events.FirstOrDefaultAsync(x => x.RefId == evt.RefId);
-                if (c is null)
+                using (var context = GetContext())
                 {
-                    c = evt;
-                    await context.Events.AddAsync(c);
-                }
-                else
-                {
-                    c.SequenceId = evt.SequenceId;
-                    c = evt;
-                }
+                    if (token.IsCancellationRequested) return -1;
+                    var c = await context.Events.FirstOrDefaultAsync(x => x.RefId == evt.RefId);
+                    if (c is null)
+                    {
+                        c = evt;
+                        await context.Events.AddAsync(c);
+                    }
+                    else
+                    {
+                        c.SequenceId = evt.SequenceId;
+                        c = evt;
+                    }
 
-                if (token.IsCancellationRequested) return -1;
-                await context.SaveChangesAsync();
-                _tokenCache.TryRemove(evt.RefId, out _);
+                    if (token.IsCancellationRequested) return -1;
+                    await context.SaveChangesAsync();
+                    _tokenCache.TryRemove(evt.RefId, out _);
+                }
+                return 2;
+
             }
-            return 2;
+            catch (Exception ex)
+            {
+                _logger?.LogError("Could not save {0} {1}", evt.GetType().FullName, evt.RefId);
+                _logger?.LogError(ex.Message);
+                _logger?.LogError(ex.StackTrace);
+                if (ex.InnerException != null)
+                {
+                    _logger?.LogError(ex.InnerException.Message);
+                    _logger?.LogError(ex.InnerException.StackTrace);
+                }
+                throw;
+            }
         }
         private async Task<int> SaveQuery(
             BaseQuery query,
             CancellationToken token)
         {
 
-            using (var context = GetContext())
+            try
             {
-                if (token.IsCancellationRequested) return -1;
-                var c = await context.Queries.FirstOrDefaultAsync(x => x.RefId == query.RefId);
-                if (c is null)
+                using (var context = GetContext())
                 {
-                    c = query;
-                    await context.Queries.AddAsync(c);
-                }
-                else
-                {
-                    c.SequenceId = query.SequenceId;
-                    c = query;
-                }
+                    if (token.IsCancellationRequested) return -1;
+                    var c = await context.Queries.FirstOrDefaultAsync(x => x.RefId == query.RefId);
+                    if (c is null)
+                    {
+                        c = query;
+                        await context.Queries.AddAsync(c);
+                    }
+                    else
+                    {
+                        c.SequenceId = query.SequenceId;
+                        c = query;
+                    }
 
-                if (token.IsCancellationRequested) return -1;
-                _tokenCache.TryRemove(query.RefId, out _);
-                await context.SaveChangesAsync();
+                    if (token.IsCancellationRequested) return -1;
+                    _tokenCache.TryRemove(query.RefId, out _);
+                    await context.SaveChangesAsync();
+                }
+                return 3;
+
             }
-            return 3;
+            catch (Exception ex)
+            {
+                _logger?.LogError("Could not save {0} {1}", query.GetType().FullName, query.RefId);
+                _logger?.LogError(ex.Message);
+                _logger?.LogError(ex.StackTrace);
+                if (ex.InnerException != null)
+                {
+                    _logger?.LogError(ex.InnerException.Message);
+                    _logger?.LogError(ex.InnerException.StackTrace);
+                }
+                throw;
+            }
         }
         private async Task<int> SaveResponse(
             BaseResponse resp,
             CancellationToken token)
         {
-
-            using (var context = GetContext())
+            try
             {
-                if (token.IsCancellationRequested) return -1;
-                var c = await context.Responses.FirstOrDefaultAsync(x => x.RefId == resp.RefId);
-                if (c is null)
+                using (var context = GetContext())
                 {
-                    c = resp;
-                    await context.Responses.AddAsync(c);
-                }
-                else
-                {
-                    c.SequenceId = resp.SequenceId;
-                    c = resp;
-                }
+                    if (token.IsCancellationRequested) return -1;
+                    var c = await context.Responses.FirstOrDefaultAsync(x => x.RefId == resp.RefId);
+                    if (c is null)
+                    {
+                        c = resp;
+                        await context.Responses.AddAsync(c);
+                    }
+                    else
+                    {
+                        c.SequenceId = resp.SequenceId;
+                        c = resp;
+                    }
 
-                if (token.IsCancellationRequested) return -1;
-                _tokenCache.TryRemove(resp.RefId, out _);
-                await context.SaveChangesAsync();
+                    if (token.IsCancellationRequested) return -1;
+                    _tokenCache.TryRemove(resp.RefId, out _);
+                    await context.SaveChangesAsync();
+                }
+                return 4;
+
             }
-            return 4;
+            catch (Exception ex)
+            {
+                _logger?.LogError("Could not save {0} {1}", resp.GetType().FullName, resp.RefId);
+                _logger?.LogError(ex.Message);
+                _logger?.LogError(ex.StackTrace);
+                if (ex.InnerException != null)
+                {
+                    _logger?.LogError(ex.InnerException.Message);
+                    _logger?.LogError(ex.InnerException.StackTrace);
+                }
+                throw;
+            }
         }
     }
 
