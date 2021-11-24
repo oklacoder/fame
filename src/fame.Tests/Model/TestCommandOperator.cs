@@ -27,6 +27,8 @@ namespace fame.Tests
             if (args?.ShouldThrow is true)
                 throw new InvalidOperationException("Manually thrown for testing purposes.");
 
+            await Task.Delay(1000);
+
             resp = new TestResponse() as T;
             if (resp is null) throw new InvalidCastException(
                 string.Format(

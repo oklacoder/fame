@@ -45,35 +45,35 @@ namespace fame.Persist.Postgresql
 
             target.HandleStarted += async (object target, IMessage msg) =>
             {
-                await SaveMessage(msg);
+                //await SaveMessage(msg);
             };
             target.HandleValidationStarted += async (object target, IMessage msg) =>
             {
-                await SaveMessage(msg);
+                //await SaveMessage(msg);
             };
             target.HandleValidationSucceeded += async (object target, IMessage msg) =>
             {
-                await SaveMessage(msg);
+                //await SaveMessage(msg);
             };
             target.HandleValidationFailed += async (object target, IMessage msg) =>
             {
-                await SaveMessage(msg);
+                //await SaveMessage(msg);
             };
             target.HandleExecutionStarted += async (object target, IMessage msg) =>
             {
-                await SaveMessage(msg);
+                //await SaveMessage(msg);
             };
             target.HandleExecutionSucceeded += async (object target, IMessage msg) =>
             {
-                await SaveMessage(msg);
+                //await SaveMessage(msg);
             };
             target.HandleSucceeded += async (object target, IMessage msg) =>
             {
-                await SaveMessage(msg);
+                //await SaveMessage(msg);
             };
             target.HandleFailed += async (object target, IMessage msg) =>
             {
-                await SaveMessage(msg);
+                //await SaveMessage(msg);
             };
             target.HandleFinished += async (object target, IMessage msg) =>
             {

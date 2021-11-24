@@ -51,35 +51,35 @@ namespace fame.seaq
 
             target.HandleStarted += async (object target, IMessage msg) =>
             {
-                await IndexMessage(msg);
+                //await IndexMessage(msg);
             };
             target.HandleValidationStarted += async (object target, IMessage msg) =>
             {
-                await IndexMessage(msg);
+                //await IndexMessage(msg);
             };
             target.HandleValidationSucceeded += async (object target, IMessage msg) =>
             {
-                await IndexMessage(msg);
+                //await IndexMessage(msg);
             };
             target.HandleValidationFailed += async (object target, IMessage msg) =>
             {
-                await IndexMessage(msg);
+                //await IndexMessage(msg);
             };
             target.HandleExecutionStarted += async (object target, IMessage msg) =>
             {
-                await IndexMessage(msg);
+                //await IndexMessage(msg);
             };
             target.HandleExecutionSucceeded += async (object target, IMessage msg) =>
             {
-                await IndexMessage(msg);
+                //await IndexMessage(msg);
             };
             target.HandleSucceeded += async (object target, IMessage msg) =>
             {
-                await IndexMessage(msg);
+                //await IndexMessage(msg);
             };
             target.HandleFailed += async (object target, IMessage msg) =>
             {
-                await IndexMessage(msg);
+                //await IndexMessage(msg);
             };
             target.HandleFinished += async (object target, IMessage msg) =>
             {
