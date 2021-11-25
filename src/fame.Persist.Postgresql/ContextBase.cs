@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Npgsql;
 using System.Linq;
 
 namespace fame.Persist.Postgresql
@@ -8,6 +10,7 @@ namespace fame.Persist.Postgresql
         DbContext
     {
         private readonly string _connectionString;
+        private readonly ILoggerFactory loggerFactory;
 
         public DbSet<BaseCommand> Commands { get; set; }
         public DbSet<BaseQuery> Queries { get; set; }
@@ -19,9 +22,13 @@ namespace fame.Persist.Postgresql
 
         }
         public ContextBase(
-            string connectionString)
+            string connectionString,
+            ILoggerFactory loggerFactory = null)
         {
             _connectionString = connectionString;
+            this.loggerFactory = loggerFactory;
+
+            NpgsqlConnection.GlobalTypeMapper.UseJsonNet();
         }
 
         protected override void OnModelCreating(
@@ -114,6 +121,10 @@ namespace fame.Persist.Postgresql
             if (!string.IsNullOrWhiteSpace(_connectionString))
             {
                 builder.UseNpgsql(_connectionString);
+            }
+            if (loggerFactory != null)
+            {
+                builder.UseLoggerFactory(loggerFactory);
             }
         }
     }

@@ -1,5 +1,5 @@
 {
   "PostgresServer": {
-    "PostgresqlConnection": "Host=localhost;Database=fame;Username=postgres;Password=admin"
+    "PostgresqlConnection": "Host=localhost;Database=fame;Username=postgres;Password=admin;IncludeErrorDetails=true;"
   }
 }

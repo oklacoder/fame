@@ -21,6 +21,87 @@ namespace fame.Persist.Postgresql
         private ILogger<PostgresPlugin> _logger;
 
         private ConcurrentDictionary<Guid, CancellationTokenSource> _tokenCache;
+        
+        ConcurrentQueue<BaseCommand> _commandQueue;
+        bool commandQueueIsProcessing = false;
+        ConcurrentQueue<BaseEvent> _eventQueue;
+        bool eventQueueIsProcessing = false;
+        ConcurrentQueue<BaseQuery> _queryQueue;
+        bool queryQueueIsProcessing = false;
+        ConcurrentQueue<BaseResponse> _responseQueue;
+        bool responseQueueIsProcessing = false;
+
+        private async Task<int> QueueCommand(BaseCommand command, CancellationToken token)
+        {
+            _commandQueue.Enqueue(command);
+            if (commandQueueIsProcessing is not true)
+                await ProcessCommandQueue(token);
+            return 0;
+        }
+        private async Task<int> ProcessCommandQueue(CancellationToken token)
+        {
+            commandQueueIsProcessing = true;
+            foreach (var cmd in _commandQueue)
+            {
+                await SaveCommand(cmd, token);
+            }
+            commandQueueIsProcessing = false;
+            return 0;
+        }
+        
+        private async Task<int> QueueEvent(BaseEvent evt, CancellationToken token)
+        {
+            _eventQueue.Enqueue(evt);
+            if (eventQueueIsProcessing is not true)
+                await ProcessEventQueue(token);
+            return 0;
+        }
+        private async Task<int> ProcessEventQueue(CancellationToken token)
+        {
+            eventQueueIsProcessing = true;
+            foreach (var evt in _eventQueue)
+            {
+                await SaveEvent(evt, token);
+            }
+            eventQueueIsProcessing = false;
+            return 0;
+        }
+
+        private async Task<int> QueueQuery(BaseQuery query, CancellationToken token)
+        {
+            _queryQueue.Enqueue(query);
+            if (queryQueueIsProcessing is not true)
+                await ProcessQueryQueue(token);
+            return 0;
+        }
+        private async Task<int> ProcessQueryQueue(CancellationToken token)
+        {
+            queryQueueIsProcessing = true;
+            foreach (var query in _queryQueue)
+            {
+                await SaveQuery(query, token);
+            }
+            queryQueueIsProcessing = false;
+            return 0;
+        }
+
+        private async Task<int> QueueResponse(BaseResponse response, CancellationToken token)
+        {
+            _responseQueue.Enqueue(response);
+            if (responseQueueIsProcessing is not true)
+                await ProcessResponseQueue(token);
+            return 0;
+        }
+        private async Task<int> ProcessResponseQueue(CancellationToken token)
+        {
+            responseQueueIsProcessing = true;
+            foreach (var response in _responseQueue)
+            {
+                await SaveResponse(response, token);
+            }
+            responseQueueIsProcessing = false;
+            return 0;
+        }
 
         public void Configure(
             IConfiguration config, 
@@ -36,6 +117,10 @@ namespace fame.Persist.Postgresql
             }
 
             _tokenCache = new ConcurrentDictionary<Guid, CancellationTokenSource>();
+            _commandQueue = new ConcurrentQueue<BaseCommand>();
+            _eventQueue = new ConcurrentQueue<BaseEvent>(); 
+            _queryQueue = new ConcurrentQueue<BaseQuery>();
+            _responseQueue = new ConcurrentQueue<BaseResponse>();
         }
 
         public void Enroll(IOperator target)
@@ -102,10 +187,10 @@ namespace fame.Persist.Postgresql
 
             _ = msg switch
             {
-                BaseCommand c => await SaveCommand(c, token),
-                BaseEvent e => await SaveEvent(e, token),
-                BaseQuery q => await SaveQuery(q, token),
-                BaseResponse r => await SaveResponse(r, token),
+                BaseCommand c => await QueueCommand(c, token),
+                BaseEvent e => await QueueEvent(e, token),
+                BaseQuery q => await QueueQuery(q, token),
+                BaseResponse r => await QueueResponse(r, token),
                 _ => 0
             };
         }
@@ -134,11 +219,14 @@ namespace fame.Persist.Postgresql
                     await context.SaveChangesAsync();
                     _tokenCache.TryRemove(cmd.RefId, out _);
                 }
+
+                var str = Newtonsoft.Json.JsonConvert.SerializeObject(cmd);
                 return 1;
 
             }
             catch (Exception ex)
             {
+                var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(cmd);
                 _logger?.LogError("Could not save {0} {1}", cmd.GetType().FullName, cmd.RefId);
                 _logger?.LogError(ex.Message);
                 _logger?.LogError(ex.StackTrace);
