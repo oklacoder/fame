@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using seaq;
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,10 +22,14 @@ namespace fame.seaq
         public bool? IsConfigured => _cluster is not null;
         public bool? CanPing => _cluster?.CanPing();
 
-        public bool? IsProcessing => null;
-        public int? QueuedMessages => 0;
+        public bool? IsProcessing => messageQueueIsProcessing;
+        public int? QueuedMessages => _messageQueue?.Count ?? 0;
 
         private ILogger<SeaqPlugin> _logger;
+
+        ConcurrentQueue<IMessage> _messageQueue = new ConcurrentQueue<IMessage>();
+        bool messageQueueIsProcessing = false;
+
         private SeaqPluginConfig _config;
 
         public void Configure(
@@ -54,42 +59,58 @@ namespace fame.seaq
 
             target.HandleStarted += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                await QueueMessage(msg);
             };
             target.HandleValidationStarted += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleValidationSucceeded += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleValidationFailed += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleExecutionStarted += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleExecutionSucceeded += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleSucceeded += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleFailed += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleFinished += async (object target, IMessage msg) =>
             {
-                await IndexMessage(msg);
+                await QueueMessage(msg);
             };
         }
 
+        private async Task QueueMessage(IMessage msg)
+        {
+            _messageQueue.Enqueue(msg);
+            if (messageQueueIsProcessing is not true)
+                await ProcessMessageQueue();
+        }
+        private async Task<int> ProcessMessageQueue()
+        {
+            messageQueueIsProcessing = true;
+            while (_messageQueue.TryDequeue(out var cmd))
+            {
+                await IndexMessage(cmd);
+            }
+            messageQueueIsProcessing = false;
+            return 0;
+        }
 
         private async Task IndexMessage(IMessage msg)
         {

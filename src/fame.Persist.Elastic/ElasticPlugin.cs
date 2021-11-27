@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Nest;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,10 +17,14 @@ namespace fame.Persist.Elastic
         public bool? IsConfigured => _config is not null;
         public bool? CanPing => _client?.Ping()?.IsValid;
 
-        public bool? IsProcessing => null;
-        public int? QueuedMessages => 0;
+        public bool? IsProcessing => messageQueueIsProcessing;
+        public int? QueuedMessages => _messageQueue?.Count ?? 0;
 
         private ILogger<ElasticPlugin> _logger;
+
+
+        ConcurrentQueue<IMessage> _messageQueue = new ConcurrentQueue<IMessage>();
+        bool messageQueueIsProcessing = false;
 
         public void Configure(
             IConfiguration config,
@@ -42,39 +47,39 @@ namespace fame.Persist.Elastic
 
             target.HandleStarted += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                await QueueMessage(msg);
             };
             target.HandleValidationStarted += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleValidationSucceeded += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleValidationFailed += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleExecutionStarted += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleExecutionSucceeded += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleSucceeded += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleFailed += async (object target, IMessage msg) =>
             {
-                //await IndexMessage(msg);
+                //await QueueMessage(msg);
             };
             target.HandleFinished += async (object target, IMessage msg) =>
             {
-                await IndexMessage(msg);
+                await QueueMessage(msg);
             };
         }
 
@@ -97,6 +102,22 @@ namespace fame.Persist.Elastic
             return obj?.GetType()?.FullName.ToLowerInvariant();
         }
             
+        private async Task QueueMessage(IMessage msg)
+        {
+            _messageQueue.Enqueue(msg);
+            if (messageQueueIsProcessing is not true)
+                await ProcessMessageQueue();
+        }
+        private async Task<int> ProcessMessageQueue()
+        {
+            messageQueueIsProcessing = true;
+            while (_messageQueue.TryDequeue(out var cmd))
+            {
+                await IndexMessage(cmd);
+            }
+            messageQueueIsProcessing = false;
+            return 0;
+        }
 
         private async Task IndexMessage(IMessage msg)
         {

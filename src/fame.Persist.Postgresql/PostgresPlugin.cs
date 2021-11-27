@@ -35,13 +35,13 @@ namespace fame.Persist.Postgresql
 
         private ILogger<PostgresPlugin> _logger;
                 
-        ConcurrentQueue<BaseCommand> _commandQueue;
+        ConcurrentQueue<BaseCommand> _commandQueue = new ConcurrentQueue<BaseCommand>();
         bool commandQueueIsProcessing = false;
-        ConcurrentQueue<BaseEvent> _eventQueue;
+        ConcurrentQueue<BaseEvent> _eventQueue = new ConcurrentQueue<BaseEvent>();
         bool eventQueueIsProcessing = false;
-        ConcurrentQueue<BaseQuery> _queryQueue;
+        ConcurrentQueue<BaseQuery> _queryQueue = new ConcurrentQueue<BaseQuery>();
         bool queryQueueIsProcessing = false;
-        ConcurrentQueue<BaseResponse> _responseQueue;
+        ConcurrentQueue<BaseResponse> _responseQueue = new ConcurrentQueue<BaseResponse>();
         bool responseQueueIsProcessing = false;
 
         private async Task<int> QueueCommand(BaseCommand command)
@@ -128,11 +128,6 @@ namespace fame.Persist.Postgresql
             {
                 context.Database.EnsureCreated();
             }
-
-            _commandQueue = new ConcurrentQueue<BaseCommand>();
-            _eventQueue = new ConcurrentQueue<BaseEvent>(); 
-            _queryQueue = new ConcurrentQueue<BaseQuery>();
-            _responseQueue = new ConcurrentQueue<BaseResponse>();
         }
 
         public void Enroll(IOperator target)
