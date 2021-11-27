@@ -16,6 +16,9 @@ namespace fame.Persist.Elastic
         public bool? IsConfigured => _config is not null;
         public bool? CanPing => _client?.Ping()?.IsValid;
 
+        public bool? IsProcessing => null;
+        public int? QueuedMessages => 0;
+
         private ILogger<ElasticPlugin> _logger;
 
         public void Configure(

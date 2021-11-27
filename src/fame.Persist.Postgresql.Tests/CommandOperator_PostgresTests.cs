@@ -243,7 +243,10 @@ namespace fame.Persist.Postgresql.Tests
 
             BaseCommand msg;
 
-            await Task.Delay(ConsistencyDelay);
+            while (opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
 
             using (var context = GetContext())
             {
@@ -266,7 +269,7 @@ namespace fame.Persist.Postgresql.Tests
         {
             var services = GetServices();
             var opr = services.GetService<TestCommandOperator>();
-            var count = 500;
+            var count = 1;
 
             var props = FakerService.GetFakeProperties(count);
 
@@ -280,9 +283,14 @@ namespace fame.Persist.Postgresql.Tests
                 success = success && resp.Successful is true;
             }
 
-            await Task.Delay(ConsistencyDelay);
+            while(opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
 
             int actualCount = 0;
+
+            
 
             using (var context = GetContext())
             {
@@ -290,7 +298,7 @@ namespace fame.Persist.Postgresql.Tests
             }
 
             Assert.True(success);
-            Assert.True(count < actualCount);
+            Assert.True(count <= actualCount);
         }
         [Fact]
         public async void CommandOperator_CanConfigureAndExecute_HappyPath()
@@ -303,8 +311,10 @@ namespace fame.Persist.Postgresql.Tests
             await opr.SafeHandle<TestResponse>(cmd);
 
             BaseCommand msg;
-
-            await Task.Delay(ConsistencyDelay);
+            while (opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
 
             using (var context = GetContext())
             {
@@ -334,7 +344,10 @@ namespace fame.Persist.Postgresql.Tests
 
             BaseCommand msg;
 
-            await Task.Delay(ConsistencyDelay);
+            while (opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
 
             using (var context = GetContext())
             {
@@ -364,7 +377,10 @@ namespace fame.Persist.Postgresql.Tests
 
             BaseCommand msg;
 
-            await Task.Delay(ConsistencyDelay);
+            while (opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
 
             using (var context = GetContext())
             {
@@ -405,7 +421,10 @@ namespace fame.Persist.Postgresql.Tests
 
             BaseEvent msg;
 
-            await Task.Delay(ConsistencyDelay);
+            while (opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
 
             using (var context = GetContext())
             {
@@ -430,7 +449,10 @@ namespace fame.Persist.Postgresql.Tests
 
             BaseEvent msg;
 
-            await Task.Delay(ConsistencyDelay);
+            while (opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
 
             using (var context = GetContext())
             {
@@ -466,7 +488,10 @@ namespace fame.Persist.Postgresql.Tests
 
             BaseQuery msg;
 
-            await Task.Delay(ConsistencyDelay);
+            while (opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
 
             using (var context = GetContext())
             {
@@ -493,7 +518,10 @@ namespace fame.Persist.Postgresql.Tests
 
             BaseQuery msg;
 
-            await Task.Delay(ConsistencyDelay);
+            while (opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
 
             using (var context = GetContext())
             {
@@ -533,7 +561,10 @@ namespace fame.Persist.Postgresql.Tests
 
             BaseResponse msg;
 
-            await Task.Delay(ConsistencyDelay);
+            while (opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
 
             using (var context = GetContext())
             {
@@ -558,7 +589,10 @@ namespace fame.Persist.Postgresql.Tests
 
             BaseResponse msg;
 
-            await Task.Delay(ConsistencyDelay);
+            while (opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
 
             using (var context = GetContext())
             {

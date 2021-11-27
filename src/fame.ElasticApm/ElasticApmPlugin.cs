@@ -21,6 +21,10 @@ namespace fame.ElasticApm
         };
 
         public bool? IsConfigured => Elastic.Apm.Agent.IsConfigured;
+
+        public bool? IsProcessing => null;
+        public int? QueuedMessages => 0;
+
         private ILogger<ElasticApmPlugin> _logger;
 
         public void Configure(

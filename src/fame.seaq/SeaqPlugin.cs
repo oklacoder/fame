@@ -21,6 +21,9 @@ namespace fame.seaq
         public bool? IsConfigured => _cluster is not null;
         public bool? CanPing => _cluster?.CanPing();
 
+        public bool? IsProcessing => null;
+        public int? QueuedMessages => 0;
+
         private ILogger<SeaqPlugin> _logger;
         private SeaqPluginConfig _config;
 

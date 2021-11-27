@@ -30,7 +30,7 @@ namespace fame
         {
             this._logger = logger?.CreateLogger<BaseCommandOperator>();
 
-            List<string> _plugins = new List<string>();
+            List<IFamePlugin> pluginTemp = new List<IFamePlugin>();
 
             if (plugins?.Any() is true)
             {
@@ -40,12 +40,19 @@ namespace fame
                     _logger?.LogDebug("Configuring plugin: {0}", p.GetType().FullName);
                     p.Configure(config, logger);
                     p.Enroll(this);
-                    _plugins.Add(p.GetType().FullName);
+                    pluginTemp.Add(p);
+                    
                 }
             }
 
-            Plugins = _plugins;
+            _plugins = pluginTemp;
         }
+
+        private IEnumerable<IFamePlugin> _plugins { get; set; }
+        public IEnumerable<string> Plugins => _plugins.Select(x => x.GetType().FullName);
+        public bool? AnyPluginsProcessing => _plugins?.Any(x => x.IsProcessing is true);
+        public int? PluginQueuedMessages => _plugins.Select(x => x.QueuedMessages)?.Sum();
+
 
         async Task<T> IOperator.Handle<T>(IMessage msg)
         {
@@ -71,8 +78,6 @@ namespace fame
                         typeof(BaseCommand).FullName));
             return await SafeHandle<T>(cmd);
         }
-
-        public IEnumerable<string> Plugins { get; private set; }
 
         public abstract Task<T> Handle<T>(BaseCommand cmd)
             where T : BaseResponse;
@@ -117,14 +122,14 @@ namespace fame
                 List<string> messages = new List<string>();
                 messages.Add($"Error processing {cmd.GetType().FullName} {cmd.RefId}");
                 messages.Add(ex.Message);
-                messages.Add(ex.StackTrace);
+                messages.Add(ex.StackTrace);    
                 if (ex.InnerException is not null)
                 {
                     messages.Add(ex?.InnerException.Message);
                     messages.Add(ex?.InnerException.StackTrace);
                 }
                 messages.ForEach(x => _logger?.LogError(x));
-                return new T().Error(messages, cmd);
+                resp = new T().Error(messages, cmd);
             }
             finally
             {

@@ -11,6 +11,8 @@ namespace fame
     public interface IFamePlugin
     {
         public bool? IsConfigured { get; }
+        bool? IsProcessing { get; }
+        int? QueuedMessages { get; }
 
         public void Configure(IConfiguration config, ILoggerFactory logger);
         public void Enroll(IOperator @operator);

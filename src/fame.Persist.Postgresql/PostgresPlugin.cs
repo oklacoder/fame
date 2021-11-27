@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.Threading;
 using System.Collections.Concurrent;
+using System.Linq;
 
 namespace fame.Persist.Postgresql
 {
@@ -17,11 +18,23 @@ namespace fame.Persist.Postgresql
     {
         private PostgresPluginConfig _config = null;
         public bool? IsConfigured => _config is not null;
+        public bool? IsProcessing => 
+            commandQueueIsProcessing || 
+            eventQueueIsProcessing || 
+            queryQueueIsProcessing || 
+            responseQueueIsProcessing;
+
+        public int? QueuedMessages =>
+            new[]
+            {
+                _commandQueue?.Count ?? 0,
+                _eventQueue?.Count ?? 0,
+                _queryQueue?.Count ?? 0,
+                _responseQueue?.Count ?? 0,
+            }.Sum();
 
         private ILogger<PostgresPlugin> _logger;
-
-        private ConcurrentDictionary<Guid, CancellationTokenSource> _tokenCache;
-        
+                
         ConcurrentQueue<BaseCommand> _commandQueue;
         bool commandQueueIsProcessing = false;
         ConcurrentQueue<BaseEvent> _eventQueue;
@@ -31,73 +44,73 @@ namespace fame.Persist.Postgresql
         ConcurrentQueue<BaseResponse> _responseQueue;
         bool responseQueueIsProcessing = false;
 
-        private async Task<int> QueueCommand(BaseCommand command, CancellationToken token)
+        private async Task<int> QueueCommand(BaseCommand command)
         {
             _commandQueue.Enqueue(command);
             if (commandQueueIsProcessing is not true)
-                await ProcessCommandQueue(token);
+                await ProcessCommandQueue();
             return 0;
         }
-        private async Task<int> ProcessCommandQueue(CancellationToken token)
+        private async Task<int> ProcessCommandQueue()
         {
             commandQueueIsProcessing = true;
-            foreach (var cmd in _commandQueue)
+            while (_commandQueue.TryDequeue(out var cmd))
             {
-                await SaveCommand(cmd, token);
+                await SaveCommand(cmd);
             }
             commandQueueIsProcessing = false;
             return 0;
         }
         
-        private async Task<int> QueueEvent(BaseEvent evt, CancellationToken token)
+        private async Task<int> QueueEvent(BaseEvent evt)
         {
             _eventQueue.Enqueue(evt);
             if (eventQueueIsProcessing is not true)
-                await ProcessEventQueue(token);
+                await ProcessEventQueue();
             return 0;
         }
-        private async Task<int> ProcessEventQueue(CancellationToken token)
+        private async Task<int> ProcessEventQueue()
         {
             eventQueueIsProcessing = true;
-            foreach (var evt in _eventQueue)
+            while (_eventQueue.TryDequeue(out var evt))
             {
-                await SaveEvent(evt, token);
+                await SaveEvent(evt);
             }
             eventQueueIsProcessing = false;
             return 0;
         }
 
-        private async Task<int> QueueQuery(BaseQuery query, CancellationToken token)
+        private async Task<int> QueueQuery(BaseQuery query)
         {
             _queryQueue.Enqueue(query);
             if (queryQueueIsProcessing is not true)
-                await ProcessQueryQueue(token);
+                await ProcessQueryQueue();
             return 0;
         }
-        private async Task<int> ProcessQueryQueue(CancellationToken token)
+        private async Task<int> ProcessQueryQueue()
         {
             queryQueueIsProcessing = true;
-            foreach (var query in _queryQueue)
+            while (_queryQueue.TryDequeue(out var query))
             {
-                await SaveQuery(query, token);
+                await SaveQuery(query);
             }
             queryQueueIsProcessing = false;
             return 0;
         }
 
-        private async Task<int> QueueResponse(BaseResponse response, CancellationToken token)
+        private async Task<int> QueueResponse(BaseResponse response)
         {
             _responseQueue.Enqueue(response);
             if (responseQueueIsProcessing is not true)
-                await ProcessResponseQueue(token);
+                await ProcessResponseQueue();
             return 0;
         }
-        private async Task<int> ProcessResponseQueue(CancellationToken token)
+        private async Task<int> ProcessResponseQueue()
         {
             responseQueueIsProcessing = true;
-            foreach (var response in _responseQueue)
+            while(_responseQueue.TryDequeue(out var response))
             {
-                await SaveResponse(response, token);
+                await SaveResponse(response);
             }
             responseQueueIsProcessing = false;
             return 0;
@@ -116,7 +129,6 @@ namespace fame.Persist.Postgresql
                 context.Database.EnsureCreated();
             }
 
-            _tokenCache = new ConcurrentDictionary<Guid, CancellationTokenSource>();
             _commandQueue = new ConcurrentQueue<BaseCommand>();
             _eventQueue = new ConcurrentQueue<BaseEvent>(); 
             _queryQueue = new ConcurrentQueue<BaseQuery>();
@@ -129,8 +141,8 @@ namespace fame.Persist.Postgresql
                 throw new InvalidOperationException($"Cannot enroll an operator in a plugin ({nameof(PostgresPlugin)}) that has not been configured.");
 
             target.HandleStarted += async (object target, IMessage msg) =>
-            {
-                //await SaveMessage(msg);
+            {//this is good - it forces the db to generate a SequenceId when the message is first seen
+                await SaveMessage(msg);
             };
             target.HandleValidationStarted += async (object target, IMessage msg) =>
             {
@@ -176,48 +188,36 @@ namespace fame.Persist.Postgresql
             var typ = msg.GetType();
             if (!typ.IsAssignableTo(typeof(BaseMessage))) return;
 
-            if (_tokenCache.TryGetValue(msg.RefId, out var cancellationSource))
-            {
-                cancellationSource.Cancel();
-            }
-
-            cancellationSource = new CancellationTokenSource();
-            _tokenCache[msg.RefId] = cancellationSource;
-            var token = cancellationSource.Token;
-
             _ = msg switch
             {
-                BaseCommand c => await QueueCommand(c, token),
-                BaseEvent e => await QueueEvent(e, token),
-                BaseQuery q => await QueueQuery(q, token),
-                BaseResponse r => await QueueResponse(r, token),
+                BaseCommand c => await QueueCommand(c),
+                BaseEvent e => await QueueEvent(e),
+                BaseQuery q => await QueueQuery(q),
+                BaseResponse r => await QueueResponse(r),
                 _ => 0
             };
         }
 
         private async Task<int> SaveCommand(
-            BaseCommand cmd,
-            CancellationToken token)
+            BaseCommand cmd)
         {
             try
             {
                 using (var context = GetContext())
                 {
-                    if (token.IsCancellationRequested) return -1;
-                    var c = await context.Commands.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+                    var c = await context.Commands
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
                     if (c is null)
                     {
-                        c = cmd;
-                        await context.Commands.AddAsync(c);
+                        await context.Commands.AddAsync(cmd);
                     }
                     else
                     {
-                        c.SequenceId = cmd.SequenceId;
-                        c = cmd;
+                        cmd.SequenceId = c.SequenceId;
+                        context.Commands.Update(cmd);
                     }
-                    if (token.IsCancellationRequested) return -1;
                     await context.SaveChangesAsync();
-                    _tokenCache.TryRemove(cmd.RefId, out _);
                 }
 
                 var str = Newtonsoft.Json.JsonConvert.SerializeObject(cmd);
@@ -239,30 +239,27 @@ namespace fame.Persist.Postgresql
             }
         }
         private async Task<int> SaveEvent(
-            BaseEvent evt,
-            CancellationToken token)
+            BaseEvent evt)
         {
 
             try
             {
                 using (var context = GetContext())
                 {
-                    if (token.IsCancellationRequested) return -1;
-                    var c = await context.Events.FirstOrDefaultAsync(x => x.RefId == evt.RefId);
+                    var c = await context.Events
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.RefId == evt.RefId);
                     if (c is null)
                     {
-                        c = evt;
-                        await context.Events.AddAsync(c);
+                        await context.Events.AddAsync(evt);
                     }
                     else
                     {
-                        c.SequenceId = evt.SequenceId;
-                        c = evt;
+                        evt.SequenceId = c.SequenceId;
+                        context.Events.Update(evt);
                     }
 
-                    if (token.IsCancellationRequested) return -1;
                     await context.SaveChangesAsync();
-                    _tokenCache.TryRemove(evt.RefId, out _);
                 }
                 return 2;
 
@@ -281,29 +278,26 @@ namespace fame.Persist.Postgresql
             }
         }
         private async Task<int> SaveQuery(
-            BaseQuery query,
-            CancellationToken token)
+            BaseQuery query)
         {
 
             try
             {
                 using (var context = GetContext())
                 {
-                    if (token.IsCancellationRequested) return -1;
-                    var c = await context.Queries.FirstOrDefaultAsync(x => x.RefId == query.RefId);
+                    var c = await context.Queries
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.RefId == query.RefId);
                     if (c is null)
                     {
-                        c = query;
-                        await context.Queries.AddAsync(c);
+                        await context.Queries.AddAsync(query);
                     }
                     else
                     {
-                        c.SequenceId = query.SequenceId;
-                        c = query;
+                        query.SequenceId = c.SequenceId;
+                        context.Queries.Update(query);
                     }
 
-                    if (token.IsCancellationRequested) return -1;
-                    _tokenCache.TryRemove(query.RefId, out _);
                     await context.SaveChangesAsync();
                 }
                 return 3;
@@ -323,28 +317,25 @@ namespace fame.Persist.Postgresql
             }
         }
         private async Task<int> SaveResponse(
-            BaseResponse resp,
-            CancellationToken token)
+            BaseResponse resp)
         {
             try
             {
                 using (var context = GetContext())
                 {
-                    if (token.IsCancellationRequested) return -1;
-                    var c = await context.Responses.FirstOrDefaultAsync(x => x.RefId == resp.RefId);
+                    var c = await context.Responses
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.RefId == resp.RefId);
                     if (c is null)
                     {
-                        c = resp;
-                        await context.Responses.AddAsync(c);
+                        await context.Responses.AddAsync(resp);
                     }
                     else
                     {
-                        c.SequenceId = resp.SequenceId;
-                        c = resp;
+                        resp.SequenceId = c.SequenceId;
+                        context.Responses.Update(resp);
                     }
 
-                    if (token.IsCancellationRequested) return -1;
-                    _tokenCache.TryRemove(resp.RefId, out _);
                     await context.SaveChangesAsync();
                 }
                 return 4;

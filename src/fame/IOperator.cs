@@ -5,6 +5,9 @@ namespace fame
 {
     public interface IOperator
     {
+        int? PluginQueuedMessages { get; }
+        bool? AnyPluginsProcessing { get; }
+
         public event EventHandler<IMessage> HandleStarted;
         public event EventHandler<IMessage> HandleValidationStarted;
         public event EventHandler<IMessage> HandleValidationSucceeded;

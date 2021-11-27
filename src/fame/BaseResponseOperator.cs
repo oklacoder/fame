@@ -29,7 +29,7 @@ namespace fame
         {
             this._logger = logger?.CreateLogger<BaseResponseOperator>();
 
-            List<string> _plugins = new List<string>();
+            List<IFamePlugin> pluginTemp = new List<IFamePlugin>();
 
             if (plugins?.Any() is true)
             {
@@ -39,13 +39,18 @@ namespace fame
                     _logger?.LogDebug("Configuring plugin: {0}", p.GetType().FullName);
                     p.Configure(config, logger);
                     p.Enroll(this);
-                    _plugins.Add(p.GetType().FullName);
+                    pluginTemp.Add(p);
+
                 }
             }
 
-            Plugins = _plugins;
+            _plugins = pluginTemp;
         }
-        public IEnumerable<string> Plugins { get; private set; }
+
+        private IEnumerable<IFamePlugin> _plugins { get; set; }
+        public IEnumerable<string> Plugins => _plugins.Select(x => x.GetType().FullName);
+        public bool? AnyPluginsProcessing => _plugins?.Any(x => x.IsProcessing is true);
+        public int? PluginQueuedMessages => _plugins.Select(x => x.QueuedMessages)?.Sum();
 
         async Task<T> IOperator.Handle<T>(IMessage msg)
         {
