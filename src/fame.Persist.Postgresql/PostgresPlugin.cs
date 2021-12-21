@@ -215,14 +215,18 @@ namespace fame.Persist.Postgresql
                     await context.SaveChangesAsync();
                 }
 
-                var str = Newtonsoft.Json.JsonConvert.SerializeObject(cmd);
                 return 1;
 
             }
             catch (Exception ex)
             {
-                var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(cmd);
                 _logger?.LogError("Could not save {0} {1}", cmd.GetType().FullName, cmd.RefId);
+                if (_config?.DetailedErrorLogging is true)
+                {
+                    _logger?.LogError("Message value:");
+                    var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(cmd);
+                    _logger?.LogError(str2);
+                }
                 _logger?.LogError(ex.Message);
                 _logger?.LogError(ex.StackTrace);
                 if (ex.InnerException != null)
@@ -262,6 +266,12 @@ namespace fame.Persist.Postgresql
             catch (Exception ex)
             {
                 _logger?.LogError("Could not save {0} {1}", evt.GetType().FullName, evt.RefId);
+                if (_config?.DetailedErrorLogging is true)
+                {
+                    _logger?.LogError("Message value:");
+                    var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(evt);
+                    _logger?.LogError(str2);
+                }
                 _logger?.LogError(ex.Message);
                 _logger?.LogError(ex.StackTrace);
                 if (ex.InnerException != null)
@@ -301,6 +311,12 @@ namespace fame.Persist.Postgresql
             catch (Exception ex)
             {
                 _logger?.LogError("Could not save {0} {1}", query.GetType().FullName, query.RefId);
+                if (_config?.DetailedErrorLogging is true)
+                {
+                    _logger?.LogError("Message value:");
+                    var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(query);
+                    _logger?.LogError(str2);
+                }
                 _logger?.LogError(ex.Message);
                 _logger?.LogError(ex.StackTrace);
                 if (ex.InnerException != null)
@@ -339,6 +355,12 @@ namespace fame.Persist.Postgresql
             catch (Exception ex)
             {
                 _logger?.LogError("Could not save {0} {1}", resp.GetType().FullName, resp.RefId);
+                if (_config?.DetailedErrorLogging is true)
+                {
+                    _logger?.LogError("Message value:");
+                    var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(resp);
+                    _logger?.LogError(str2);
+                }
                 _logger?.LogError(ex.Message);
                 _logger?.LogError(ex.StackTrace);
                 if (ex.InnerException != null)

@@ -4,6 +4,7 @@
     {
         public const string PostgresPluginConfig_Key = "PostgresServer";
         public string PostgresqlConnection { get; set; }
+        public bool DetailedErrorLogging { get; set; } = false;
     }
 
 }

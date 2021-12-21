@@ -8,8 +8,8 @@ namespace fame.ElasticApm.Tests
 {
     public class ElasticApmTestsModule
     {
-        protected const string tran_index = "apm-7.15.0-transaction*";
-        protected const string span_index = "apm-7.15.0-span*";
+        protected const string tran_index = "apm-7.16.1-transaction*";
+        protected const string span_index = "apm-7.16.1-span*";
 
         protected const int WaitForElastic = 5000;
 
