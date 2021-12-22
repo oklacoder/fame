@@ -28,7 +28,7 @@ namespace fame.Persist.Postgresql
             _connectionString = connectionString;
             this.loggerFactory = loggerFactory;
 
-            NpgsqlConnection.GlobalTypeMapper.UseJsonNet();
+            //NpgsqlConnection.GlobalTypeMapper.UseJsonNet();
         }
 
         protected override void OnModelCreating(

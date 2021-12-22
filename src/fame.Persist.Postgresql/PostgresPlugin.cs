@@ -183,7 +183,7 @@ namespace fame.Persist.Postgresql
             if (_config?.DetailedErrorLogging is true)
             {
                 _logger?.LogDebug("Message value:");
-                var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(msg);
+                var str2 = System.Text.Json.JsonSerializer.Serialize(msg);
                 _logger?.LogDebug(str2);
             }
             var typ = msg.GetType();
@@ -230,7 +230,7 @@ namespace fame.Persist.Postgresql
                 if (_config?.DetailedErrorLogging is true)
                 {
                     _logger?.LogError("Message value:");
-                    var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(cmd);
+                    var str2 = System.Text.Json.JsonSerializer.Serialize(cmd);
                     _logger?.LogError(str2);
                 }
                 _logger?.LogError(ex.Message);
@@ -275,7 +275,7 @@ namespace fame.Persist.Postgresql
                 if (_config?.DetailedErrorLogging is true)
                 {
                     _logger?.LogError("Message value:");
-                    var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(evt);
+                    var str2 = System.Text.Json.JsonSerializer.Serialize(evt);
                     _logger?.LogError(str2);
                 }
                 _logger?.LogError(ex.Message);
@@ -320,7 +320,7 @@ namespace fame.Persist.Postgresql
                 if (_config?.DetailedErrorLogging is true)
                 {
                     _logger?.LogError("Message value:");
-                    var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(query);
+                    var str2 = System.Text.Json.JsonSerializer.Serialize(query);
                     _logger?.LogError(str2);
                 }
                 _logger?.LogError(ex.Message);
@@ -364,7 +364,7 @@ namespace fame.Persist.Postgresql
                 if (_config?.DetailedErrorLogging is true)
                 {
                     _logger?.LogError("Message value:");
-                    var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(resp);
+                    var str2 = System.Text.Json.JsonSerializer.Serialize(resp);
                     _logger?.LogError(str2);
                 }
                 _logger?.LogError(ex.Message);
