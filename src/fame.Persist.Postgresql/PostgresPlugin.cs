@@ -18,10 +18,10 @@ namespace fame.Persist.Postgresql
     {
         private PostgresPluginConfig _config = null;
         public bool? IsConfigured => _config is not null;
-        public bool? IsProcessing => 
-            commandQueueIsProcessing || 
-            eventQueueIsProcessing || 
-            queryQueueIsProcessing || 
+        public bool? IsProcessing =>
+            commandQueueIsProcessing ||
+            eventQueueIsProcessing ||
+            queryQueueIsProcessing ||
             responseQueueIsProcessing;
 
         public int? QueuedMessages =>
@@ -34,7 +34,7 @@ namespace fame.Persist.Postgresql
             }.Sum();
 
         private ILogger<PostgresPlugin> _logger;
-                
+
         ConcurrentQueue<BaseCommand> _commandQueue = new ConcurrentQueue<BaseCommand>();
         bool commandQueueIsProcessing = false;
         ConcurrentQueue<BaseEvent> _eventQueue = new ConcurrentQueue<BaseEvent>();
@@ -61,7 +61,7 @@ namespace fame.Persist.Postgresql
             commandQueueIsProcessing = false;
             return 0;
         }
-        
+
         private async Task<int> QueueEvent(BaseEvent evt)
         {
             _eventQueue.Enqueue(evt);
@@ -108,7 +108,7 @@ namespace fame.Persist.Postgresql
         private async Task<int> ProcessResponseQueue()
         {
             responseQueueIsProcessing = true;
-            while(_responseQueue.TryDequeue(out var response))
+            while (_responseQueue.TryDequeue(out var response))
             {
                 await SaveResponse(response);
             }
@@ -117,7 +117,7 @@ namespace fame.Persist.Postgresql
         }
 
         public void Configure(
-            IConfiguration config, 
+            IConfiguration config,
             ILoggerFactory logger)
         {
             _logger = logger?.CreateLogger<PostgresPlugin>();
@@ -137,7 +137,7 @@ namespace fame.Persist.Postgresql
 
             target.HandleStarted += async (object target, IMessage msg) =>
             {//this is good - it forces the db to generate a SequenceId when the message is first seen
-                await SaveMessage(msg);
+                //await SaveMessage(msg);
             };
             target.HandleValidationStarted += async (object target, IMessage msg) =>
             {
@@ -172,7 +172,7 @@ namespace fame.Persist.Postgresql
                 await SaveMessage(msg);
             };
         }
-
+         
         private ContextBase GetContext()
         {
             return new ContextBase(_config.PostgresqlConnection);
@@ -180,6 +180,12 @@ namespace fame.Persist.Postgresql
 
         private async Task SaveMessage(IMessage msg)
         {
+            if (_config?.DetailedErrorLogging is true)
+            {
+                _logger?.LogDebug("Message value:");
+                var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(msg);
+                _logger?.LogDebug(str2);
+            }
             var typ = msg.GetType();
             if (!typ.IsAssignableTo(typeof(BaseMessage))) return;
 
