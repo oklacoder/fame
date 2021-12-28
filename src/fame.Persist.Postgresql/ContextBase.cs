@@ -77,7 +77,7 @@ namespace fame.Persist.Postgresql
                 .HasKey(x => x.SequenceId);
             builder.Entity<BaseEvent>()
                 .Property(x => x.AggregateId)
-                .HasComputedColumnSql($"\"{nameof(BaseEvent.Args)}\" -> '{nameof(BaseEventArgs.AggregateId)}'", true);
+                .HasComputedColumnSql($"\"{nameof(BaseEvent.Args)}\" --> '{nameof(BaseEventArgs.AggregateId)}'", true);
             builder.Entity<BaseEvent>()
                 .HasIndex(x => x.RefId);
             builder.Entity<BaseEvent>()
