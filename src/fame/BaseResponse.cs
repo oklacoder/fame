@@ -15,6 +15,17 @@ namespace fame
         public bool? IsValid { get; set; }
         public IEnumerable<string> Messages { get; set; }
 
+        public string Type
+        {
+            get { return GetType().FullName; }
+            set { }
+        }
+        public string ArgsType
+        {
+            get { return Args?.GetType().FullName; }
+            set { }
+        }
+
         public BaseResponse()
         {
             RefId = Guid.NewGuid();

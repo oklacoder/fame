@@ -19,6 +19,16 @@ namespace fame
         public virtual BaseCommandArgs Args { get; set; }
         public virtual BaseResponse Response { get; set; }
 
+        public string Type
+        {
+            get { return GetType().FullName; }
+            set { }
+        }
+        public string ArgsType
+        {
+            get { return Args?.GetType().FullName; }
+            set { }
+        }
 
         public DateTime? FinishedDateUtc => (ErrorDateUtc ?? ValidationFailedDateUtc ?? CompletedDateUtc);
         public long? DurationMs => FinishedDateUtc.HasValue ? (FinishedDateUtc - DateTimeUtc)?.Milliseconds : null;

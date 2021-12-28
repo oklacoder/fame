@@ -5,6 +5,7 @@ namespace fame
     public class BaseEvent :
         BaseMessage
     {
+
         public override Guid RefId { get; set; }
         public override DateTime DateTimeUtc { get; set; }
         public virtual BaseEventArgs Args { get; set; }
@@ -16,6 +17,16 @@ namespace fame
         {
             get { return Args?.AggregateId; }
             set { /* ef core makes us do this, the jerk */}
+        }
+        public string Type
+        {
+            get { return GetType().FullName; }
+            set { }
+        }
+        public string ArgsType
+        {
+            get { return Args?.GetType().FullName; }
+            set { }
         }
 
         public BaseEvent()
