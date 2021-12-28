@@ -465,6 +465,35 @@ namespace fame.Persist.Postgresql.Tests
             Assert.Equal(type, typeof(TestEvent).FullName);
             Assert.NotNull(msg.Args);
         }
+        [Fact]
+        public async void EventOperator_CorrectlySetsAggregateIdOnSavedEvents()
+        {
+            var services = GetServices();
+            var opr = services.GetService<TestEventOperator>();
+            var aggId = Guid.NewGuid().ToString();
+            var args = new TestEventArgs() { ShouldThrow = false, AggregateId = aggId };
+            var cmd = new TestEvent(args);
+            await opr.SafeHandle<TestResponse>(cmd);
+
+            BaseEvent msg;
+
+            while (opr.AnyPluginsProcessing is true)
+            {
+                await Task.Delay(ConsistencyDelay);
+            }
+
+            using (var context = GetContext())
+            {
+                msg = await context.Events.FirstOrDefaultAsync(x => x.RefId == cmd.RefId);
+            }
+
+            var type = msg.GetType().FullName;
+
+            Assert.NotNull(msg);
+            Assert.Equal(type, typeof(TestEvent).FullName);
+            Assert.NotNull(msg.Args);
+            Assert.Equal(msg.AggregateId, aggId);
+        }
     }
     public class QueryOperator_PostgresTests :
         PostgresTestsModule

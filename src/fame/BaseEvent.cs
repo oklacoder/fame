@@ -12,7 +12,11 @@ namespace fame
         public string SourceUserId { get; set; }
         public string SourceService { get; set; }
 
-        public string AggregateId => Args?.AggregateId;
+        public string AggregateId
+        {
+            get { return Args?.AggregateId; }
+            set { /* ef core makes us do this, the jerk */}
+        }
 
         public BaseEvent()
         {
