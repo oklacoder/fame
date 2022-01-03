@@ -202,6 +202,7 @@ namespace fame.Persist.Postgresql
         private async Task<int> SaveCommand(
             BaseCommand cmd)
         {
+            _logger.LogTrace("Logging message {0} {1} {2} {3}", cmd.GetType(), cmd.RefId, Environment.NewLine, System.Text.Json.JsonSerializer.Serialize(cmd));
             try
             {
                 using (var context = GetContext())
@@ -246,7 +247,7 @@ namespace fame.Persist.Postgresql
         private async Task<int> SaveEvent(
             BaseEvent evt)
         {
-
+            _logger.LogTrace("Logging message {0} {1} {2} {3}", evt.GetType(), evt.RefId, Environment.NewLine, System.Text.Json.JsonSerializer.Serialize(evt));
             try
             {
                 using (var context = GetContext())
@@ -291,7 +292,7 @@ namespace fame.Persist.Postgresql
         private async Task<int> SaveQuery(
             BaseQuery query)
         {
-
+            _logger.LogTrace("Logging message {0} {1} {2} {3}", query.GetType(), query.RefId, Environment.NewLine, System.Text.Json.JsonSerializer.Serialize(query));
             try
             {
                 using (var context = GetContext())
@@ -336,6 +337,7 @@ namespace fame.Persist.Postgresql
         private async Task<int> SaveResponse(
             BaseResponse resp)
         {
+            _logger.LogTrace("Logging message {0} {1} {2} {3}", resp.GetType(), resp.RefId, Environment.NewLine, System.Text.Json.JsonSerializer.Serialize(resp));
             try
             {
                 using (var context = GetContext())
