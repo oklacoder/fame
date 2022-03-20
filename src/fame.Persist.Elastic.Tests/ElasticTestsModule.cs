@@ -9,7 +9,7 @@ namespace fame.Persist.Elastic.Tests
     public class ElasticTestsModule
     {
         IConfiguration config;
-        protected const int ElasticConsistencyDelay = 200;
+        protected const int ElasticConsistencyDelay = 500;
 
         protected ServiceProvider GetServices()
         {
@@ -20,8 +20,10 @@ namespace fame.Persist.Elastic.Tests
                .AddJsonFile("testConfig.json").Build();
             services.AddSingleton<IConfiguration>(config);
 
-            var conn = new ConnectionSettings(new Uri("http://localhost:9200"));
+            var conn = new ConnectionSettings(new Uri("https://localhost:9200"));
             conn.BasicAuthentication("elastic", "elastic");
+            conn.ServerCertificateValidationCallback((a, b, c, d) => true);
+            conn.EnableDebugMode();
             var client = new Nest.ElasticClient(conn);
             services.AddSingleton(client);
 

@@ -36,6 +36,16 @@ namespace fame.Persist.Elastic
             config.GetSection(ElasticPluginConfig.ElasticPluginConfig_Key).Bind(_config);
 
             var conn = new ConnectionSettings(new Uri(_config.ElasticUrl));
+
+            ///this is the great big hammer to break out when things aren't working - 
+            ///it bypasses certificate validation entirely, which is necessary for local self-signed certs,
+            ///but can be a GIANT security risk otherwise.  Only used for debugging for a reason.
+#if DEBUG
+            _logger?.LogDebug("DEBUG mode enabled.  Ignoring server certificate validation and enabling additional Elasticsearch debug messages.");
+            conn.ServerCertificateValidationCallback((a, b, c, d) => true);
+            conn.EnableDebugMode();
+#endif        
+
             if (_config?.ElasticUser is not null && _config?.ElasticPass is not null)
                 conn.BasicAuthentication(_config?.ElasticUser, _config?.ElasticPass);
             _client = new ElasticClient(conn);
@@ -136,7 +146,7 @@ namespace fame.Persist.Elastic
                                 Elasticsearch.Net.Refresh.False));
                 if (!resp.IsValid)
                 {
-                    _logger.LogWarning("Couldn't persist message {0} using plugin {1} - {2}", msg.RefId, GetType().FullName, resp?.ServerError?.Error?.Reason);
+                    _logger?.LogWarning("Couldn't persist message {0} using plugin {1} - {2}", msg.RefId, GetType().FullName, resp?.ServerError?.Error?.Reason);
                 }
             }
         }

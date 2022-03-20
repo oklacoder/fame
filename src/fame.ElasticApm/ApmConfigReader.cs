@@ -96,5 +96,15 @@ namespace fame.ElasticApm
         public bool UseElasticTraceparentHeader { get; set; } = Elastic.Apm.Config.ConfigConsts.DefaultValues.UseElasticTraceparentHeader;
 
         public bool VerifyServerCert { get; set; } = Elastic.Apm.Config.ConfigConsts.DefaultValues.VerifyServerCert;
+
+        public double ExitSpanMinDuration { get; set; } = Elastic.Apm.Config.ConfigConsts.DefaultValues.ExitSpanMinDurationInMilliseconds;
+
+        public bool SpanCompressionEnabled { get; set; } = Elastic.Apm.Config.ConfigConsts.DefaultValues.SpanCompressionEnabled;
+
+        public double SpanCompressionExactMatchMaxDuration { get; set; } = Elastic.Apm.Config.ConfigConsts.DefaultValues.SpanCompressionExactMatchMaxDurationInMilliseconds;
+
+        public double SpanCompressionSameKindMaxDuration { get; set; } = Elastic.Apm.Config.ConfigConsts.DefaultValues.SpanCompressionExactMatchMaxDurationInMilliseconds;
+
+        public bool EnableOpenTelemetryBridge { get; set; } = Elastic.Apm.Config.ConfigConsts.DefaultValues.EnableOpenTelemetryBridge;
     }
 }

@@ -72,9 +72,10 @@ namespace fame.seaq.tests
 
 
             var conn = new ConnectionSettings(
-                new Elasticsearch.Net.SingleNodeConnectionPool(new Uri("http://localhost:9200")),
+                new Elasticsearch.Net.SingleNodeConnectionPool(new Uri(_config?.ClusterUrl)),
                 (a, b) => new DefaultSeaqElasticsearchSerializer(TryGetSearchType));
-            conn.BasicAuthentication("elastic", "elastic");
+            conn.BasicAuthentication(_config?.ClusterUser, _config?.ClusterPass);
+            conn.ServerCertificateValidationCallback((a,b,c,d) => true);
             var client = new Nest.ElasticClient(conn);
             services.AddSingleton(client);
 

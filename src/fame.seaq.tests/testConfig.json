@@ -1,7 +1,7 @@
 {
   "Seaq": {
     "ClusterScope": "seaqplugin_tests",
-    "ClusterUrl": "http://localhost:9200",
+    "ClusterUrl": "https://localhost:9200",
     "ClusterUser": "elastic",
     "ClusterPass": "elastic",
     "ClusterBypassCertificateValidation": true,
